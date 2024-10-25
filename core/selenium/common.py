@@ -1,14 +1,11 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
 
 
 def initialize_driver():
-    # Initializes the browser options
+    service = Service('/home/virginia/.wdm/drivers/chromedriver/linux64/130.0.6723.69/chromedriver-linux64/chromedriver'
+                      )
     options = webdriver.ChromeOptions()
-
-    # Initialise the browser using WebDriver Manager
-    service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=options)
     return driver
 
