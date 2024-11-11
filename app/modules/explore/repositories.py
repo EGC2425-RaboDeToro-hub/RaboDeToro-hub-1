@@ -1,5 +1,5 @@
 import re
-from sqlalchemy import any_, or_, and_
+from sqlalchemy import any_, or_
 import unidecode
 from app.modules.dataset.models import Author, DSMetaData, DataSet, PublicationType
 from app.modules.featuremodel.models import FMMetaData, FeatureModel
@@ -57,7 +57,7 @@ class ExploreRepository(BaseRepository):
 
         # Filtro de fechas
         if after_date and before_date:
-            datasets = datasets.filter(and_(DataSet.created_at >= after_date, DataSet.created_at <= before_date))
+            datasets = datasets.filter(DataSet.created_at.between(after_date, before_date))
         elif after_date:
             datasets = datasets.filter(DataSet.created_at >= after_date)
         elif before_date:
