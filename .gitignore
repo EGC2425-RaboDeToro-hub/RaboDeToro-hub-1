@@ -17,3 +17,7 @@ nginx.prod.ssl.conf
 entrypoint.sh
 deployments.log
 test_file.txt
+RaboDeToroHub1venv/
+google-chrome-stable_current_amd64.deb 
+core/selenium/common.py 
+
