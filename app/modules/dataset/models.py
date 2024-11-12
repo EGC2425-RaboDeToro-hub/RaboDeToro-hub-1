@@ -49,10 +49,12 @@ class DSMetrics(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     number_of_models = db.Column(db.String(120))
     number_of_features = db.Column(db.String(120))
+    feature_count = db.Column(db.Integer)  # Nueva columna para el conteo de características
+    product_count = db.Column(db.Integer)  # Nueva columna para el conteo de productos
+
 
     def __repr__(self):
-        return f'DSMetrics<models={self.number_of_models}, features={self.number_of_features}>'
-
+        return f'DSMetrics<models={self.number_of_models}, features={self.number_of_features}, feature_count={self.feature_count}, product_count={self.product_count}>'
 
 class DSMetaData(db.Model):
     id = db.Column(db.Integer, primary_key=True)
