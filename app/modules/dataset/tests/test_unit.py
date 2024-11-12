@@ -3,6 +3,7 @@ from unittest.mock import patch
 from flask import Flask
 from app.modules.dataset.services import DataSetService
 from app.modules.dataset.routes import dataset_bp
+import os
 
 
 # Fixture para el servicio DataSetService
@@ -15,7 +16,7 @@ def dataset_service():
 @pytest.fixture
 def app():
     app = Flask(__name__)
-    app.secret_key = "test"
+    app.secret_key = os.getenv('FLASK_SECRET_KEY', 'default_secret_key')
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'  # Base de datos en memoria
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
