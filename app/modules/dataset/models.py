@@ -93,6 +93,11 @@ class DataSet(db.Model):
         db.session.delete(self)
         db.session.commit()
 
+    def is_synchronized(self) -> bool:
+        from app.modules.dataset.services import DataSetService
+        service = DataSetService()
+        return service.is_synchronized(dataset_id=self.id)
+
     def get_cleaned_publication_type(self):
         return self.ds_meta_data.publication_type.name.replace('_', ' ').title()
 

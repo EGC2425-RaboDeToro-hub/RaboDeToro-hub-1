@@ -4,8 +4,10 @@ import hashlib
 import shutil
 from typing import Optional
 import uuid
+import tempfile
 
 from flask import request
+from zipfile import ZipFile
 
 from app.modules.auth.services import AuthenticationService
 from app.modules.dataset.models import DSViewRecord, DataSet, DSMetaData
@@ -48,6 +50,7 @@ class DataSetService(BaseService):
         self.hubfilerepository = HubfileRepository()
         self.dsviewrecord_repostory = DSViewRecordRepository()
         self.hubfileviewrecord_repository = HubfileViewRecordRepository()
+        self.repository = DataSetRepository()
 
     def move_feature_models(self, dataset: DataSet):
         current_user = AuthenticationService().get_authenticated_user()
@@ -61,6 +64,9 @@ class DataSetService(BaseService):
         for feature_model in dataset.feature_models:
             uvl_filename = feature_model.fm_meta_data.uvl_filename
             shutil.move(os.path.join(source_dir, uvl_filename), dest_dir)
+
+    def is_synchronized(self, dataset_id: int) -> bool:
+        return self.repository.is_synchronized(dataset_id)
 
     def get_synchronized(self, current_user_id: int) -> DataSet:
         return self.repository.get_synchronized(current_user_id)
@@ -139,6 +145,65 @@ class DataSetService(BaseService):
     def get_uvlhub_doi(self, dataset: DataSet) -> str:
         domain = os.getenv('DOMAIN', 'localhost')
         return f'http://{domain}/doi/{dataset.ds_meta_data.dataset_doi}'
+
+    def zip_dataset(self, dataset: DataSet) -> str:
+        working_dir = os.getenv('WORKING_DIR', '')
+        file_path = os.path.join(working_dir, "uploads", f"user_{dataset.user_id}", f"dataset_{dataset.id}")
+        temp_dir = tempfile.mkdtemp()
+        zip_path = os.path.join(temp_dir, f"dataset_{dataset.id}.zip")
+
+        with ZipFile(zip_path, "w") as zipf:
+            for subdir, dirs, files in os.walk(file_path):
+                for file in files:
+                    full_path = os.path.join(subdir, file)
+
+                    relative_path = os.path.relpath(full_path, file_path)
+
+                    zipf.write(
+                        full_path,
+                        arcname=os.path.join(
+                            os.path.basename(zip_path[:-4]), relative_path
+                        ),
+                    )
+
+        return temp_dir
+
+    def zip_all_datasets(self) -> str:
+        temp_dir = tempfile.mkdtemp()
+        zip_path = os.path.join(temp_dir, "all_datasets.zip")
+        try:
+            with ZipFile(zip_path, "w") as zipf:
+                logger.info("Iniciando la creación del archivo ZIP de todos los datasets sincronizados.")
+                found_files = False  # Variable para verificar si se encuentran archivos
+
+                for user_dir in os.listdir("uploads"):
+                    user_path = os.path.join("uploads", user_dir)
+                    if os.path.isdir(user_path) and user_dir.startswith("user_"):
+                        for dataset_dir in os.listdir(user_path):
+                            dataset_path = os.path.join(user_path, dataset_dir)
+                            if os.path.isdir(dataset_path) and dataset_dir.startswith("dataset_"):
+                                dataset_id = int(dataset_dir.split("_")[1])
+                                if self.is_synchronized(dataset_id):
+                                    logger.info(f"Dataset sincronizado encontrado: {dataset_id} en {dataset_path}")
+                                    # Añadir todos los archivos y subdirectorios del dataset al ZIP
+                                    for subdir, dirs, files in os.walk(dataset_path):
+                                        for file in files:
+                                            full_path = os.path.join(subdir, file)
+                                            # Mantener la estructura de directorios en el ZIP
+                                            relative_path = os.path.relpath(full_path, user_path)
+                                            zipf.write(
+                                                full_path,
+                                                arcname=os.path.join(user_dir, relative_path),
+                                            )
+                                            found_files = True  # Se encontró al menos un archivo
+                if not found_files:
+                    logger.warning("No se encontraron archivos en los datasets sincronizados para añadir al ZIP.")
+                if not os.path.exists(zip_path):
+                    raise FileNotFoundError("El archivo ZIP no fue creado correctamente.")
+        except Exception as e:
+            logger.error(f"Error al crear el archivo ZIP de todos los datasets: {e}")
+            raise e
+        return zip_path
 
 
 class AuthorService(BaseService):
