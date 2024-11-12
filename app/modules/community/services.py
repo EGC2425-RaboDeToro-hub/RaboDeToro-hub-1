@@ -80,7 +80,7 @@ class CommunityService(BaseService):
             description=description,
             code=code
         )
-        self.community_user_service.create(user_id=owner.id, community_id=community.id, is_admin=True)
+        self.community_user_service.create(code, user_id=owner.id, community_id=community.id, is_admin=True)
         self.repository.save(community)
         return community
 
