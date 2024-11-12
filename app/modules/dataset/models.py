@@ -81,11 +81,11 @@ class DataSet(db.Model):
 
     def name(self):
         return self.ds_meta_data.title
-    
+
     def calculate_total_size(self):
         """Calcula el tamaño total en KB de los archivos en los feature models"""
         self.size_in_kb = sum(file.size for fm in self.feature_models for file in fm.files) / 1024
-        
+
     def files(self):
         return [file for fm in self.feature_models for file in fm.files]
 
