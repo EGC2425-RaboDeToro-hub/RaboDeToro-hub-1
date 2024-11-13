@@ -7,14 +7,16 @@ document.addEventListener('DOMContentLoaded', function () {
         var confirm_password = document.getElementById('confirm_password');
         var submit_button = document.getElementById('submit_button');
 
-        function validatePasswords() {
+        // Definimos validatePasswords usando una expresión de función
+        const validatePasswords = function() {
             if (password.value && confirm_password.value && password.value === confirm_password.value) {
                 submit_button.disabled = false;
             } else {
                 submit_button.disabled = true;
             }
-        }
+        };
 
+        // Añadimos los event listeners
         password.addEventListener('input', validatePasswords);
         confirm_password.addEventListener('input', validatePasswords);
     }
