@@ -1,7 +1,8 @@
 from app.modules.auth.services import AuthenticationService
-from app.modules.dataset.models import DataSet
+from app.modules.dataset.models import DataSet, Author, DSMetaData
 from flask import render_template, redirect, url_for, request
 from flask_login import login_required, current_user
+from app.modules.dataset.repositories import AuthorRepository, DataSetRepository
 
 from app import db
 from app.modules.profile import profile_bp
@@ -53,3 +54,20 @@ def my_profile():
         pagination=user_datasets_pagination,
         total_datasets=total_datasets_count
     )
+
+@profile_bp.route('/author/<int:author_id>/projects')
+def proyectos_autor(author_id):
+    author = Author.query.get(author_id)
+    if not author:
+        return "Autor no encontrado", 404
+    
+    datasets = DataSet.query.join(DSMetaData).filter(DSMetaData.authors.any(id=author_id)).all()
+
+    return render_template('profile/author_projects.html', author=author, datasets=datasets)
+
+@profile_bp.route('/dataset/<int:dataset_id>', methods=['GET'])
+def dataset_detail(dataset_id):
+    dataset = DataSet.query.get(dataset_id)
+    if not dataset:
+        return "Dataset no encontrado", 404
+    pass
