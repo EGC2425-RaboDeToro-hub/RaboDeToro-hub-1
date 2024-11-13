@@ -110,6 +110,13 @@ def upgrade():
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('token',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('token', sa.String(length=256), nullable=False),
+    sa.Column('usedTime', sa.DateTime(), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+
+    )
     op.create_table('ds_download_record',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
