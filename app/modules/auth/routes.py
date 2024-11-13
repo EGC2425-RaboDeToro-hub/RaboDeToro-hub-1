@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, request
+from flask import render_template, redirect, url_for, request, session
 from flask_login import current_user, login_user, logout_user
 
 from app.modules.auth import auth_bp
@@ -20,12 +20,14 @@ def show_signup_form():
     if form.validate_on_submit():
         email = form.email.data
         if not authentication_service.is_email_available(email):
-            return render_template("auth/signup_form.html", form=form, error=f'Email {email} in use')
+            return render_template("auth/signup_form.html", form=form,
+                                   error=f'Email {email} in use')
 
         try:
             user = authentication_service.create_with_profile(**form.data)
         except Exception as exc:
-            return render_template("auth/signup_form.html", form=form, error=f'Error creating user: {exc}')
+            return render_template("auth/signup_form.html", form=form, 
+                                   error=f'Error creating user: {exc}')
 
         # Log user
         login_user(user, remember=True)
@@ -42,11 +44,17 @@ def login():
     form = LoginForm()
     if request.method == 'POST' and form.validate_on_submit():
         if authentication_service.login(form.email.data, form.password.data):
+
+# Al acertar la contraseña, se añade el valor None a los intentos fallidos
+            session.pop('failed_attempts', None)
             return redirect(url_for('public.index'))
+# Al fallar, se añade +1 al valor de los intentos fallidos
+        session['failed_attempts'] = session.get('failed_attempts', 0) + 1
+        show_forgot_password = session['failed_attempts'] > 0
+        return render_template("auth/login_form.html", form=form,
+                               error='Invalid credentials', show_forgot_password=show_forgot_password)
 
-        return render_template("auth/login_form.html", form=form, error='Invalid credentials')
-
-    return render_template('auth/login_form.html', form=form)
+    return render_template('auth/login_form.html', form=form,show_forgot_password=False)
 
 
 @auth_bp.route('/logout')
