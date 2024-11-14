@@ -13,6 +13,9 @@ class CommunityUsersRepository(BaseRepository):
     def get_by_user_id(self, user_id):
         return self.model.query.filter_by(user_id=user_id).all()
 
+    def get_community_user_by_user_id_and_community(self, user_id, community_id):
+        return self.model.query.filter_by(user_id=user_id, community_id=community_id).first()
+
 
 class CommunityRepository(BaseRepository):
     def __init__(self):
