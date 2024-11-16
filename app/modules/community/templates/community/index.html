@@ -4,64 +4,25 @@
 
 {% block content %}
 <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px;">
-    <!-- Sección para crear una comunidad -->
+    <!-- Boton para acceder a pantalla de crear comunidad -->
     <div style="flex: 1; margin-right: 20px;">
-        <h2>Crear Comunidad</h2>
-        <form method="POST" action="{{ url_for('community.create_community') }}">
-            {{ createForm.hidden_tag() }}
-            <div>
-                <label for="name">Nombre:</label>
-                {{ createForm.name }}
-            </div>
-            <div>
-                <label for="description">Descripción:</label>
-                {{ createForm.description }}
-            </div>
-            <div>
-                <label for="code">Código:</label>
-                {{ createForm.code }}
-            </div>
-            <button type="submit">Crear Comunidad</button>
-        </form>
+        <a href="{{ url_for('community.create_community') }}"><button>Crear Comunidad</button></a>
     </div>
 
     <!-- Sección para unirse a una comunidad -->
-    <div style="flex: 1;">
-        <h2>Unirse a una Comunidad</h2>
-        <form method="POST" action="{{ url_for('community.join_community') }}">
-            {{ findForm.hidden_tag() }}
-            <div>
-                <label for="joinCode">Código de la Comunidad:</label>
-                {{ findForm.joinCode }}
-            </div>
-            <button type="submit">Unirse</button>
-        </form>
+    <div style="flex: 1; margin-right: 20px;">
+        <a href="{{ url_for('community.join_community') }}"><button>Unirse a una Comunidad</button></a>
     </div>
 </div>
-
-{% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-        <ul class="flashes">
-        {% for category, message in messages %}
-            <li class="{{ category }}">{{ message }}</li>
-        {% endfor %}
-        </ul>
-    {% endif %}
-{% endwith %}
 
 {% if communities %}
     <h2>Mis Comunidades</h2>
     <ul>
     {% for community in communities %}
         <li>
-            <strong><a href="{{ url_for('community.get_community', community_id=community.id) }}">{{ community.name }}</a></strong>
-            {% if community.is_admin %}
-                <a href="{{ url_for('community.edit_community', community_id=community.id) }}">Edit</a>
-                <form method="POST" action="{{ url_for('community.delete_community', community_id=community.id) }}" style="display:inline;">
-                    {{ form.hidden_tag() }}
-                    <button type="submit">Delete</button>
-                </form>
-            {% endif %}
+            <strong><a href="{{ url_for('community.get_community', community_id=community.id) }}">
+                {{ community.name }}
+            </a></strong>
         </li>
     {% endfor %}
     </ul>

@@ -1,0 +1,110 @@
+2024-11-16 17:47:16,365 - app - ERROR - Exception on /community/create [POST]
+Traceback (most recent call last):
+  File "/home/juanant/Desktop/RaboDeToro-hub-1/RaboDeToroHub1venv/lib/python3.12/site-packages/flask/app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juanant/Desktop/RaboDeToro-hub-1/RaboDeToroHub1venv/lib/python3.12/site-packages/flask/app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juanant/Desktop/RaboDeToro-hub-1/RaboDeToroHub1venv/lib/python3.12/site-packages/flask_restful/__init__.py", line 298, in error_router
+    return original_handler(e)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/juanant/Desktop/RaboDeToro-hub-1/RaboDeToroHub1venv/lib/python3.12/site-packages/flask/app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juanant/Desktop/RaboDeToro-hub-1/RaboDeToroHub1venv/lib/python3.12/site-packages/flask/app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juanant/Desktop/RaboDeToro-hub-1/RaboDeToroHub1venv/lib/python3.12/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juanant/Desktop/RaboDeToro-hub-1/app/modules/community/routes.py", line 49, in create_community
+    return redirect(url_for('community.get_community', community=community))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juanant/Desktop/RaboDeToro-hub-1/RaboDeToroHub1venv/lib/python3.12/site-packages/flask/helpers.py", line 220, in url_for
+    return current_app.url_for(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/juanant/Desktop/RaboDeToro-hub-1/RaboDeToroHub1venv/lib/python3.12/site-packages/flask/app.py", line 1084, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juanant/Desktop/RaboDeToro-hub-1/RaboDeToroHub1venv/lib/python3.12/site-packages/flask/app.py", line 1073, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juanant/Desktop/RaboDeToro-hub-1/RaboDeToroHub1venv/lib/python3.12/site-packages/werkzeug/routing/map.py", line 924, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'community.get_community' with values ['community']. Did you forget to specify values ['community_id']?
+2024-11-16 17:47:16,368 - app - ERROR - Internal Server Error: 500 Internal Server Error: The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.
+2024-11-16 18:08:48,382 - app - ERROR - Exception on /community/join [POST]
+Traceback (most recent call last):
+  File "/home/juanant/Desktop/RaboDeToro-hub-1/RaboDeToroHub1venv/lib/python3.12/site-packages/flask/app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juanant/Desktop/RaboDeToro-hub-1/RaboDeToroHub1venv/lib/python3.12/site-packages/flask/app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juanant/Desktop/RaboDeToro-hub-1/RaboDeToroHub1venv/lib/python3.12/site-packages/flask_restful/__init__.py", line 298, in error_router
+    return original_handler(e)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/juanant/Desktop/RaboDeToro-hub-1/RaboDeToroHub1venv/lib/python3.12/site-packages/flask/app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juanant/Desktop/RaboDeToro-hub-1/RaboDeToroHub1venv/lib/python3.12/site-packages/flask/app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juanant/Desktop/RaboDeToro-hub-1/RaboDeToroHub1venv/lib/python3.12/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juanant/Desktop/RaboDeToro-hub-1/app/modules/community/routes.py", line 70, in join_community
+    community_user_service.create_community_user(user_id=current_user.id, community_id=community.id)
+  File "/home/juanant/Desktop/RaboDeToro-hub-1/app/modules/community/services.py", line 20, in create_community_user
+    community_user = self.repository.create(user_id, community_id, is_admin)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: BaseRepository.create() takes from 1 to 2 positional arguments but 4 were given
+2024-11-16 18:08:48,383 - app - ERROR - Internal Server Error: 500 Internal Server Error: The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.
+2024-11-16 18:12:54,378 - app - ERROR - Exception on /community/join [POST]
+Traceback (most recent call last):
+  File "/home/juanant/Desktop/RaboDeToro-hub-1/RaboDeToroHub1venv/lib/python3.12/site-packages/flask/app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juanant/Desktop/RaboDeToro-hub-1/RaboDeToroHub1venv/lib/python3.12/site-packages/flask/app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juanant/Desktop/RaboDeToro-hub-1/RaboDeToroHub1venv/lib/python3.12/site-packages/flask_restful/__init__.py", line 298, in error_router
+    return original_handler(e)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/juanant/Desktop/RaboDeToro-hub-1/RaboDeToroHub1venv/lib/python3.12/site-packages/flask/app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juanant/Desktop/RaboDeToro-hub-1/RaboDeToroHub1venv/lib/python3.12/site-packages/flask/app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juanant/Desktop/RaboDeToro-hub-1/RaboDeToroHub1venv/lib/python3.12/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juanant/Desktop/RaboDeToro-hub-1/app/modules/community/routes.py", line 70, in join_community
+    community_user_service.create_community_user(user_id=current_user.id, community_id=community.id)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'CommunityUserService' object has no attribute 'create_community_user'
+2024-11-16 18:12:54,380 - app - ERROR - Internal Server Error: 500 Internal Server Error: The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.
+2024-11-16 18:16:14,365 - app - ERROR - Exception on /community/20 [GET]
+Traceback (most recent call last):
+  File "/home/juanant/Desktop/RaboDeToro-hub-1/RaboDeToroHub1venv/lib/python3.12/site-packages/flask/app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juanant/Desktop/RaboDeToro-hub-1/RaboDeToroHub1venv/lib/python3.12/site-packages/flask/app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juanant/Desktop/RaboDeToro-hub-1/RaboDeToroHub1venv/lib/python3.12/site-packages/flask_restful/__init__.py", line 298, in error_router
+    return original_handler(e)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/juanant/Desktop/RaboDeToro-hub-1/RaboDeToroHub1venv/lib/python3.12/site-packages/flask/app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juanant/Desktop/RaboDeToro-hub-1/RaboDeToroHub1venv/lib/python3.12/site-packages/flask/app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/juanant/Desktop/RaboDeToro-hub-1/RaboDeToroHub1venv/lib/python3.12/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: get_community() got an unexpected keyword argument 'community_id'
+2024-11-16 18:16:14,366 - app - ERROR - Internal Server Error: 500 Internal Server Error: The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.
