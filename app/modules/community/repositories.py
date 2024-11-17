@@ -8,7 +8,7 @@ class CommunityUsersRepository(BaseRepository):
         super().__init__(CommunityUser)
 
     def get_users_by_community(self, community_id):
-        return self.model.query.join(self.model.user).filter_by(community_id=community_id).all()
+        return self.model.query.filter_by(community_id=community_id).all()
 
     def get_by_user_id(self, user_id):
         return self.model.query.filter_by(user_id=user_id).all()
@@ -35,6 +35,3 @@ class CommunityRepository(BaseRepository):
 
     def get_communities_by_dataset_id(self, dataset_id):
         return self.model.query.join(self.model.datasets).filter_by(id=dataset_id).all()
-
-    def get_datasets_by_user_id(self, user_id):
-        return self.model.query.join(self.model.datasets).filter_by(user_id=user_id).all()

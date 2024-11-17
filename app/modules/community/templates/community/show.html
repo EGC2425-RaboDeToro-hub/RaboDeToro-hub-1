@@ -3,28 +3,86 @@
 {% block title %}{{ community.name }}{% endblock %}
 
 {% block content %}
-<div>
-    <h2>{{ community.name }}</h2>
-    <p>{{ community.description }}</p>
-    <p>Users: {{ usersSize }}</p>
-    <p>Datasets: {{ datasetsSize }}</p>
+<div class="col-12 col-md-8 col-lg-6"> 
+
+    <div class="card shadow-sm" > 
+        <div class="card-header card-dark"> 
+            <h5 class="card-title mb-0" style="color: white; font-size: 15px;">{{ community.name }}</h5>
+        </div>
+        <div class="card-body">
+            <p class="card-text h5"><i class="fa fa-user-circle"></i>{{community.description}}</p>
+            <p class="card-text h5"><i class="fa fa-id-card"></i> <strong>Users:</strong> {{usersSize}} users</p>
+            <p class="card-text h5"><i class="fa fa-database"></i> <strong>Datasets:</strong> {{ datasetsSize }} datasets</p>
+            <div class="mt-3">
+                <form method="POST" action="{{ url_for('community.delete_community', community_id=community.id) }}">
+                    <button type="submit">Delete</button>
+                </form>
+            </div>
+        </div>   
+    </div>
 </div>
 
-<div>
-    <h3>Usuarios</h3>
-    <ul>
-    {% for user in users %}
-        <li>{{ user.username }}</li>
-    {% endfor %}
-    </ul>
-</div>
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <ul class="flashes">
+        {% for category, message in messages %}
+            <li class="{{ category }}">{{ message }}</li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+{% endwith %}
 
-<div>
-    <h3>Datasets</h3>
-    <ul>
-    {% for dataset in datasets %}
-        <li>{{ dataset.name }}</li>
-    {% endfor %}
-    </ul>
+<div class="container">
+    <div class="row">
+        <!-- Sección de datasets a la izquierda -->
+        <div class="col-md-6">
+            <h3>Datasets</h3>
+            <hr>
+            {% if datasets %}
+                <div class="card">
+                    <div class="card-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Options</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for dataset in datasets %}
+                                    <tr>
+                                        <td>{{ dataset.name }}</td>
+                                        <td>
+                                            <!-- Aquí puedes agregar opciones como ver, editar, eliminar, etc. -->
+                                            <a href="{{ url_for('dataset.view', dataset_id=dataset.id) }}">View</a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% else %}
+                <p>No hay datasets disponibles.</p>
+            {% endif %}
+        </div>
+
+        <!-- Sección de usuarios a la derecha -->
+        <div class="col-md-6">
+            <h3>Usuarios</h3>
+            <hr>
+            <ul>
+            {% for user in users %}
+                <li>
+                    {% if users[user] %}
+                        <span>{{ user }} (admin) </span>
+                    {% else %}
+                        {{ user }}
+                    {% endif %}
+                </li>
+            {% endfor %}
+            </ul>
+        </div>
+    </div>
 </div>
 {% endblock %}

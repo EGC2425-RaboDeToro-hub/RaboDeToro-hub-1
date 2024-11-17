@@ -3,6 +3,8 @@ from flask_login import login_required, current_user
 from app.modules.community import community_bp
 from app.modules.community.services import CommunityService, CommunityUserService
 from app.modules.community.forms import CreateCommunityForm, FindCommunityForm
+from app.modules.profile.models import UserProfile
+from app.modules.dataset.models import DataSet, DSMetaData
 
 
 community_service = CommunityService()
@@ -14,10 +16,8 @@ base_url = "/community"
 @community_bp.route(base_url, methods=['GET'])
 @login_required
 def index():
-    findForm = FindCommunityForm()
-    createForm = CreateCommunityForm()
     communities = community_service.get_communities_by_user_id(current_user.id)
-    return render_template('community/index.html', communities=communities, findForm=findForm, createForm=createForm)
+    return render_template('community/index.html', communities=communities)
 
 
 @community_bp.route(base_url + "/<int:community_id>", methods=["GET"])
@@ -30,13 +30,20 @@ def get_community(community_id):
                                                                          user_id=current_user.id)
     if not community_user:
         return make_response(jsonify({"message": "You are not from this community"}), 404)
+
+    users = {}
     community_users = community_user_service.get_users_by_community(community_id=community.id)
+    for community_user in community_users:
+        user_profile = UserProfile.query.filter_by(user_id=community_user.user_id).first()
+        if user_profile:
+            users[user_profile.name] = 1 if community_user.is_admin else 0
 
     datasets = []
-    for user_id in community_users:
-        datasets += community_service.get_datasets_by_user_id(user_id)
+    for community_user in community_users:
+        datasets += DataSet.query.join(DSMetaData).filter(DSMetaData.authors.any(id=community_user.user_id)).all()
+
     return render_template('community/show.html', community=community,
-                           users=community_users, usersSize=len(community_users),
+                           users=users, usersSize=len(community_users),
                            datasets=datasets, datasetsSize=len(datasets),
                            is_admin=community_user.is_admin)
 
@@ -93,19 +100,21 @@ def update_community(community_id):
     return get_community(community_id)
 
 
-@community_bp.route(base_url + "/delete/<int:community_id>", methods=["DELETE"])
+@community_bp.route(base_url + "/delete/<int:community_id>", methods=["POST"])
 @login_required
 def delete_community(community_id):
-    # Revisa que existe la comunidad
     community = community_service.get_or_404(community_id)
     if not community:
         return flash("Comunidad no encontrada", "error")
 
-    # Revisa que el usuario se admin de la comunidad
-    community_user = community_user_service.get_by_user_id_and_community(current_user.id, community_id)
+    community_user = community_user_service.get_by_user_id_and_community(user_id=current_user.id,
+                                                                         community_id=community_id)
     if not community_user or not community_user.is_admin:
         flash("No tienes permisos para eliminar esta comunidad", "error")
-        return redirect(url_for('community.edit'))
+        return redirect(url_for('community.get_community', community_id=community_id))
 
+    community_users = community_user_service.get_users_by_community(community_id=community_id)
+    for community_user in community_users:
+        community_user_service.delete(community_user.id)
     community_service.delete(community_id)
-    return index()
+    return redirect(url_for('community.index', community_id=community_id))

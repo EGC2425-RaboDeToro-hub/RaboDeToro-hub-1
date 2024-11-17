@@ -49,6 +49,3 @@ class CommunityService(BaseService):
 
     def get_communities_by_dataset_id(self, dataset_id):
         return self.repository.get_communities_by_dataset_id(dataset_id)
-
-    def get_datasets_by_user_id(self, user_id):
-        return self.repository.get_datasets_by_user_id(user_id)
