@@ -13,9 +13,12 @@
             <p class="card-text h5"><i class="fa fa-user-circle"></i>{{community.description}}</p>
             <p class="card-text h5"><i class="fa fa-id-card"></i> <strong>Users:</strong> {{usersSize}} users</p>
             <p class="card-text h5"><i class="fa fa-database"></i> <strong>Datasets:</strong> {{ datasetsSize }} datasets</p>
+            <div style="flex: 1; margin-right: 20px;">
+                <a href="{{ url_for('community.update_community', community_id=community.id) }}"><button>Editar</button></a>
+            </div>
             <div class="mt-3">
                 <form method="POST" action="{{ url_for('community.delete_community', community_id=community.id) }}">
-                    <button type="submit">Delete</button>
+                    <button type="submit">Eliminar</button>
                 </form>
             </div>
         </div>   
@@ -34,7 +37,6 @@
 
 <div class="container">
     <div class="row">
-        <!-- Sección de datasets a la izquierda -->
         <div class="col-md-6">
             <h3>Datasets</h3>
             <hr>
@@ -72,15 +74,27 @@
             <h3>Usuarios</h3>
             <hr>
             <ul>
-            {% for user in users %}
-                <li>
-                    {% if users[user] %}
-                        <span>{{ user }} (admin) </span>
-                    {% else %}
-                        {{ user }}
-                    {% endif %}
-                </li>
-            {% endfor %}
+                {% if not users[current_user] %}
+                    {% for user in users %}
+                    <li>
+                        {% if users[user] %}
+                            <span>{{ user }} (admin) </span>
+                        {% else %}
+                            {{ user }}
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                {% else %}
+                    {% for user in users %}
+                    <li>
+                        {% if users[user] %}
+                            <span>{{ user }} (admin) </span>
+                        {% else %}
+                            <span>{{ user }} </span>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                {% endif %}
             </ul>
         </div>
     </div>

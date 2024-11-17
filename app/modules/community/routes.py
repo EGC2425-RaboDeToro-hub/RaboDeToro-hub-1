@@ -1,4 +1,4 @@
-from flask import jsonify, request, make_response, render_template, redirect, url_for, flash
+from flask import jsonify, make_response, render_template, redirect, url_for, flash
 from flask_login import login_required, current_user
 from app.modules.community import community_bp
 from app.modules.community.services import CommunityService, CommunityUserService
@@ -45,7 +45,8 @@ def get_community(community_id):
     return render_template('community/show.html', community=community,
                            users=users, usersSize=len(community_users),
                            datasets=datasets, datasetsSize=len(datasets),
-                           is_admin=community_user.is_admin)
+                           is_admin=community_user.is_admin,
+                           current_user=current_user)
 
 
 @community_bp.route(base_url + "/create", methods=["GET", "POST"])
@@ -87,17 +88,31 @@ def join_community():
     return render_template('community/join.html', findForm=FindCommunityForm())
 
 
-@community_bp.route(base_url + "/<int:community_id>", methods=["PUT"])
+@community_bp.route(base_url + "/update/<int:community_id>", methods=["GET", "POST"])
 @login_required
 def update_community(community_id):
-    data = request.json
-    name = data.get('name')
-    description = data.get('description')
-    code = data.get('code')
-    community = community_service.update(community_id, name, code, description)
-    if not community:
-        return make_response(jsonify({"message": "Community not found"}), 404)
-    return get_community(community_id)
+    form = CreateCommunityForm()
+    community = community_service.get_by_id(community_id)
+    if form.validate_on_submit():
+        name = form.name.data
+        if not name:
+            name = community.name
+        description = form.description.data
+        if not description:
+            description = community.description
+        code = form.code.data
+        if not code:
+            code = community.code
+        else:
+            community = community_service.get_community_by_code(code)
+            if community:
+                flash("El código ya está en uso", "error")
+                return redirect(url_for('community.update_community', community_id=community_id))
+        community = community_service.update(community_id, name=name, code=code, description=description)
+        if not community:
+            return flash("Comunidad no encontrada", "error")
+        return redirect(url_for('community.get_community', community_id=community.id))
+    return render_template('community/edit.html', form=form, community=community)
 
 
 @community_bp.route(base_url + "/delete/<int:community_id>", methods=["POST"])
@@ -118,3 +133,42 @@ def delete_community(community_id):
         community_user_service.delete(community_user.id)
     community_service.delete(community_id)
     return redirect(url_for('community.index', community_id=community_id))
+
+
+@community_bp.route(base_url + "/leave/<int:community_id>", methods=["POST"])
+@login_required
+def leave_community(community_id):
+    community_user = community_user_service.get_by_user_id_and_community(user_id=current_user.id,
+                                                                         community_id=community_id)
+    if not community_user:
+        flash("No perteneces a esta comunidad", "error")
+        return redirect(url_for('community.index'))
+
+    community_user_service.delete(community_user.id)
+
+    community_users = community_user_service.get_users_by_community(community_id=community_id)
+    if len(community_users) == 0:
+        community_service.delete(community_id)
+    flash("Has abandonado la comunidad exitosamente", "success")
+    return index()
+
+
+@community_bp.route(base_url + "/remove_user/<int:community_id>", methods=["POST"])
+@login_required
+def remove_user(community_id, user_id):
+    community_user = community_user_service.get_by_user_id_and_community(user_id=current_user.id,
+                                                                         community_id=community_id)
+    if not community_user or not community_user.is_admin:
+        flash("No tienes permisos para eliminar a este usuario", "error")
+        return redirect(url_for('community.get_community', community_id=community_id))
+    community_user = community_user_service.get_by_user_id_and_community(user_id=user_id,
+                                                                         community_id=community_id)
+    if not community_user:
+        flash("El usuario no pertenece a esta comunidad", "error")
+        return redirect(url_for('community.get_community', community_id=community_id))
+    if community_user.is_admin:
+        flash("No puedes eliminar al administrador de la comunidad", "error")
+        return redirect(url_for('community.get_community', community_id=community_id))
+    community_user_service.delete(community_user.id)
+    flash("Usuario eliminado exitosamente", "success")
+    return redirect(url_for('community.get_community', community_id=community_id))
