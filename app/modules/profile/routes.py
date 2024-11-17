@@ -55,7 +55,7 @@ def my_profile():
         total_datasets=total_datasets_count
     )
 
-@profile_bp.route('/author/<int:author_id>/projects', , methods=['GET'])
+@profile_bp.route('/author/<int:author_id>/projects', methods=['GET'])
 def proyectos_autor(author_id):
     author = Author.query.get(author_id)
     if not author:
