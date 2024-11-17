@@ -38,15 +38,18 @@ def get_community(community_id):
         if user_profile:
             users[user_profile.name] = 1 if community_user.is_admin else 0
 
+    current_user_name = UserProfile.query.filter_by(user_id=current_user.id).first().name
+
     datasets = []
     for community_user in community_users:
-        datasets += DataSet.query.join(DSMetaData).filter(DSMetaData.authors.any(id=community_user.user_id)).all()
+        datasets += DataSet.query.join(DSMetaData).filter(
+            DSMetaData.authors.any(id=community_user.user_id)).all()
 
     return render_template('community/show.html', community=community,
                            users=users, usersSize=len(community_users),
                            datasets=datasets, datasetsSize=len(datasets),
                            is_admin=community_user.is_admin,
-                           current_user=current_user)
+                           current_user_name=current_user_name)
 
 
 @community_bp.route(base_url + "/create", methods=["GET", "POST"])
@@ -151,24 +154,3 @@ def leave_community(community_id):
         community_service.delete(community_id)
     flash("Has abandonado la comunidad exitosamente", "success")
     return index()
-
-
-@community_bp.route(base_url + "/remove_user/<int:community_id>", methods=["POST"])
-@login_required
-def remove_user(community_id, user_id):
-    community_user = community_user_service.get_by_user_id_and_community(user_id=current_user.id,
-                                                                         community_id=community_id)
-    if not community_user or not community_user.is_admin:
-        flash("No tienes permisos para eliminar a este usuario", "error")
-        return redirect(url_for('community.get_community', community_id=community_id))
-    community_user = community_user_service.get_by_user_id_and_community(user_id=user_id,
-                                                                         community_id=community_id)
-    if not community_user:
-        flash("El usuario no pertenece a esta comunidad", "error")
-        return redirect(url_for('community.get_community', community_id=community_id))
-    if community_user.is_admin:
-        flash("No puedes eliminar al administrador de la comunidad", "error")
-        return redirect(url_for('community.get_community', community_id=community_id))
-    community_user_service.delete(community_user.id)
-    flash("Usuario eliminado exitosamente", "success")
-    return redirect(url_for('community.get_community', community_id=community_id))

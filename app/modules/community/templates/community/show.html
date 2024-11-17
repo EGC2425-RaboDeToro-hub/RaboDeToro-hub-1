@@ -74,8 +74,7 @@
             <h3>Usuarios</h3>
             <hr>
             <ul>
-                {% if not users[current_user] %}
-                    {% for user in users %}
+                {% for user in users %}
                     <li>
                         {% if users[user] %}
                             <span>{{ user }} (admin) </span>
@@ -83,18 +82,7 @@
                             {{ user }}
                         {% endif %}
                     </li>
-                    {% endfor %}
-                {% else %}
-                    {% for user in users %}
-                    <li>
-                        {% if users[user] %}
-                            <span>{{ user }} (admin) </span>
-                        {% else %}
-                            <span>{{ user }} </span>
-                        {% endif %}
-                    </li>
-                    {% endfor %}
-                {% endif %}
+                {% endfor %}
             </ul>
         </div>
     </div>
