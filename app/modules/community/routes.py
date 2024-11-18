@@ -4,8 +4,9 @@ from app.modules.community import community_bp
 from app.modules.community.services import CommunityService, CommunityUserService
 from app.modules.community.forms import CreateCommunityForm, FindCommunityForm
 from app.modules.profile.models import UserProfile
-from app.modules.dataset.models import DataSet, DSMetaData
+from app.modules.dataset.models import DataSet
 
+from app import db
 
 community_service = CommunityService()
 community_user_service = CommunityUserService()
@@ -42,8 +43,9 @@ def get_community(community_id):
 
     datasets = []
     for community_user in community_users:
-        datasets += DataSet.query.join(DSMetaData).filter(
-            DSMetaData.authors.any(id=community_user.user_id)).all()
+        datasets += db.session.query(DataSet).filter(
+            DataSet.user_id == community_user.user_id).order_by(
+                DataSet.created_at.desc())
 
     return render_template('community/show.html', community=community,
                            users=users, usersSize=len(community_users),
@@ -96,6 +98,11 @@ def join_community():
 def update_community(community_id):
     form = CreateCommunityForm()
     community = community_service.get_by_id(community_id)
+    community_user = community_user_service.get_by_user_id_and_community(user_id=current_user.id,
+                                                                         community_id=community_id)
+    if not community_user or not community_user.is_admin:
+        flash("No tienes permisos para eliminar esta comunidad", "error")
+        return redirect(url_for('community.get_community', community_id=community_id))
     if form.validate_on_submit():
         name = form.name.data
         if not name:
