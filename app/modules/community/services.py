@@ -16,25 +16,6 @@ class CommunityUserService(BaseService):
     def get_by_user_id_and_community(self, community_id, user_id):
         return self.repository.get_community_user_by_user_id_and_community(user_id=user_id, community_id=community_id)
 
-    def make_admin(self, user_id, community_id):
-        community_user = self.repository.get_community_user_by_user_id_and_community(
-            user_id=user_id, community_id=community_id)
-        if not community_user:
-            return False
-        community_user.is_admin = True
-        self.repository.create(community_user)
-        return True
-
-    def remove_admin(self, user_id, community_id):
-        community_user = self.repository.get_community_user_by_user_id_and_community(
-            user_id=user_id, community_id=community_id)
-        if not community_user:
-            return False
-
-        community_user.is_admin = False
-        self.repository.create(community_user)
-        return True
-
 
 class CommunityService(BaseService):
     def __init__(self):
