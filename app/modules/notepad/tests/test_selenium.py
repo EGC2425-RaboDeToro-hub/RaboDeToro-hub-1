@@ -2,16 +2,18 @@
 import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 
 
 class TestCreatenotepad():
     def setup_method(self, method):
-        self.driver = webdriver.Chrome()
+        self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
         self.vars = {}
-  
+
     def teardown_method(self, method):
         self.driver.quit()
-        
+
     def test_createnotepad(self):
         self.driver.get("http://localhost:5000/login")
         time.sleep(2)
