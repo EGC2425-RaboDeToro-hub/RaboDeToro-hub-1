@@ -176,6 +176,17 @@ def delete():
 
     return jsonify({"error": "Error: File not found"})
 
+@dataset_bp.route("/dataset/<int:dataset_id>/metrics", methods=["GET"])
+def get_dataset_metrics(dataset_id):
+    dataset = dataset_service.get_or_404(dataset_id)
+    if dataset and dataset.ds_meta_data and dataset.ds_meta_data.ds_metrics:
+        return jsonify({
+            "feature_count": dataset.ds_meta_data.ds_metrics.feature_count,
+            "product_count": dataset.ds_meta_data.ds_metrics.product_count
+        })
+    else:
+        return jsonify({"error": "Dataset or metrics not found"}), 404
+
 
 @dataset_bp.route("/dataset/download/<int:dataset_id>", methods=["GET"])
 def download_dataset(dataset_id):

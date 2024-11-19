@@ -49,10 +49,12 @@ class DSMetrics(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     number_of_models = db.Column(db.String(120))
     number_of_features = db.Column(db.String(120))
+    feature_count = db.Column(db.Integer, nullable=False, default=0)  # Nueva columna para el conteo de características
+    product_count = db.Column(db.Integer,  nullable=False, default=0)  # Nueva columna para el conteo de productos
+
 
     def __repr__(self):
-        return f'DSMetrics<models={self.number_of_models}, features={self.number_of_features}>'
-
+        return f'DSMetrics<models={self.number_of_models}, features={self.number_of_features}, feature_count={self.feature_count}, product_count={self.product_count}>'
 
 class DSMetaData(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -66,6 +68,9 @@ class DSMetaData(db.Model):
     ds_metrics_id = db.Column(db.Integer, db.ForeignKey('ds_metrics.id'))
     ds_metrics = db.relationship('DSMetrics', uselist=False, backref='ds_meta_data', cascade="all, delete")
     authors = db.relationship('Author', backref='ds_meta_data', lazy=True, cascade="all, delete")
+    
+    def __repr__(self):
+        return f'DSMetaData<title={self.title}, metrics={self.ds_metrics}>'
 
 
 class DataSet(db.Model):

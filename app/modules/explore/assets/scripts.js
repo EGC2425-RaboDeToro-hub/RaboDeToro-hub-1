@@ -1,19 +1,82 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Ejecutar consulta inicial
     send_query();
+
+    // Añadir evento a los filtros para aplicar automáticamente
+    const filters = document.querySelectorAll('#filters input, #filters select, #filters [type="radio"]');
+    filters.forEach(filter => {
+        filter.addEventListener('input', send_query);
+    });
+
+    // Añadir evento al botón "Apply Filters"
+    const applyFiltersButton = document.getElementById('apply-filters');
+    if (applyFiltersButton) {
+        applyFiltersButton.addEventListener('click', send_query);
+    }
+
+    // Añadir evento al botón "Clear Filters"
+    const clearFiltersButton = document.getElementById('clear-filters');
+    if (clearFiltersButton) {
+        clearFiltersButton.addEventListener('click', clearFilters);
+    }
+
+    // Manejar parámetros de consulta inicial desde la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const queryParam = urlParams.get('query');
+    if (queryParam && queryParam.trim() !== '') {
+        const queryInput = document.getElementById('query');
+        queryInput.value = queryParam;
+        queryInput.dispatchEvent(new Event('input', { bubbles: true }));
+    }
 });
 
 function send_query() {
-    console.log("send query...");
+    console.log("Iniciando consulta...");
 
     document.getElementById('results').innerHTML = '';
     document.getElementById("results_not_found").style.display = "none";
-    console.log("hide not found icon");
 
-    const filters = document.querySelectorAll('#filters input, #filters select, #filters [type="radio"]');
+    const csrfToken = document.getElementById('csrf_token')?.value || '';
 
-    filters.forEach(filter => {
-        filter.addEventListener('input', () => {
-            const csrfToken = document.getElementById('csrf_token').value;
+    // Combinar todos los criterios de búsqueda
+    const searchCriteria = {
+        csrf_token: csrfToken,
+        query: document.querySelector('#query').value,
+        publication_type: document.querySelector('#publication_type').value,
+        sorting: document.querySelector('[name="sorting"]:checked')?.value,
+        min_features: document.querySelector('#min_features').value || null,
+        max_features: document.querySelector('#max_features').value || null,
+        min_products: document.querySelector('#min_products').value || null,
+        max_products: document.querySelector('#max_products').value || null,
+        after_date: document.querySelector('#after_date').value || null, // Filtros de fechas
+        before_date: document.querySelector('#before_date').value || null,
+        min_size: parseFloat(document.querySelector('#min_size').value) || null, // Filtros de tamaño
+        max_size: parseFloat(document.querySelector('#max_size').value) || null
+    };
+
+    console.log("Criterios de búsqueda:", searchCriteria);
+
+    // Realizar la solicitud POST
+    fetch('/explore', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(searchCriteria),
+    })
+        .then(response => {
+            console.log("Estado de la respuesta:", response.status);
+            if (!response.ok) {
+                throw new Error("Error en la respuesta de la solicitud");
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log("Datos de respuesta:", data);
+            mostrarResultados(data);
+        })
+        .catch(error => {
+            console.error("Error en la solicitud fetch:", error);
 
             // Recoger los valores de los filtros, incluyendo las fechas y el tamaño
             const searchCriteria = {
@@ -111,19 +174,77 @@ function send_query() {
                 });
             });
         });
+}
+
+function mostrarResultados(data) {
+    const resultsContainer = document.getElementById('results');
+    const resultCount = data.length;
+    const resultText = resultCount === 1 ? 'dataset' : 'datasets';
+
+    document.getElementById('results_number').textContent = `${resultCount} ${resultText} found`;
+
+    if (resultCount === 0) {
+        console.log("Mostrando icono de no encontrado");
+        document.getElementById("results_not_found").style.display = "block";
+        return;
+    }
+
+    document.getElementById("results_not_found").style.display = "none";
+
+    // Crear y mostrar las tarjetas de los datasets
+    data.forEach(dataset => {
+        const card = document.createElement('div');
+        card.className = 'col-12';
+        card.innerHTML = `
+            <div class="card">
+                <div class="card-body">
+                    <h3><a href="${dataset.url}">${dataset.title}</a></h3>
+                    <p class="text-secondary">${formatDate(dataset.created_at)}</p>
+                    <p>${dataset.description}</p>
+                    <a href="${dataset.url}" class="btn btn-primary btn-sm">View dataset</a>
+                    <a href="/dataset/download/${dataset.id}" class="btn btn-secondary btn-sm">Download (${dataset.total_size_in_human_format})</a>
+                </div>
+            </div>
+        `;
+        resultsContainer.appendChild(card);
     });
 }
 
+function clearFilters() {
+    console.log("Restableciendo filtros...");
+
+    // Resetear la consulta de búsqueda
+    document.querySelector('#query').value = "";
+
+    // Resetear tipo de publicación y ordenamiento
+    document.querySelector('#publication_type').value = "any";
+    document.querySelectorAll('[name="sorting"]').forEach(option => {
+        option.checked = option.value === "newest";
+    });
+
+    // Resetear filtros de características, productos, fechas y tamaños
+    document.querySelector('#min_features').value = "";
+    document.querySelector('#max_features').value = "";
+    document.querySelector('#min_products').value = "";
+    document.querySelector('#max_products').value = "";
+    document.querySelector('#after_date').value = "";
+    document.querySelector('#before_date').value = "";
+    document.querySelector('#min_size').value = "";
+    document.querySelector('#max_size').value = "";
+
+    // Ejecutar una nueva consulta con los filtros restablecidos
+    send_query();
+}
+
 function formatDate(dateString) {
-    const options = {day: 'numeric', month: 'long', year: 'numeric', hour: 'numeric', minute: 'numeric'};
-    const date = new Date(dateString);
-    return date.toLocaleString('en-US', options);
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString('en-US', options);
 }
 
 function set_tag_as_query(tagName) {
     const queryInput = document.getElementById('query');
     queryInput.value = tagName.trim();
-    queryInput.dispatchEvent(new Event('input', {bubbles: true}));
+    send_query();
 }
 
 function set_publication_type_as_query(publicationType) {
@@ -134,7 +255,7 @@ function set_publication_type_as_query(publicationType) {
             break;
         }
     }
-    publicationTypeSelect.dispatchEvent(new Event('input', {bubbles: true}));
+    send_query();
 }
 
 document.getElementById('clear-filters').addEventListener('click', clearFilters);
@@ -172,3 +293,4 @@ document.addEventListener('DOMContentLoaded', () => {
         queryInput.dispatchEvent(new Event('input', {bubbles: true}));
     }
 });
+
