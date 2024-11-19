@@ -122,7 +122,7 @@ class DataSetRepository(BaseRepository):
         )
     
     def filter_datasets(self, min_features=None, max_features=None, min_products=None, max_products=None):
-        query = self.model.query.join(DSMetrics)
+        query = DataSet.query.join(DataSet.ds_meta_data).join(DSMetaData.ds_metrics)
         
         if min_features is not None:
             query = query.filter(DSMetrics.feature_count >= min_features)

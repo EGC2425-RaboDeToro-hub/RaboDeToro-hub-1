@@ -114,6 +114,7 @@ class DataSetService(BaseService):
         return self.dsviewrecord_repostory.total_dataset_views()
     
     def create_from_form(self, form, current_user) -> DataSet:
+        # Definir el autor principal
         main_author = {
             "name": f"{current_user.profile.surname}, {current_user.profile.name}",
             "affiliation": current_user.profile.affiliation,
@@ -121,47 +122,74 @@ class DataSetService(BaseService):
         }
         try:
             logger.info(f"Creating dsmetadata...: {form.get_dsmetadata()}")
+
+            # Crear DSMetaData
             dsmetadata = self.dsmetadata_repository.create(**form.get_dsmetadata())
+
+            # Crear o actualizar DSMetrics
+            if not dsmetadata.ds_metrics:
+                dsmetadata.ds_metrics = DSMetrics(feature_count=0, product_count=0)
+            metrics = dsmetadata.ds_metrics
+
+            # Agregar autores principales y adicionales
             for author_data in [main_author] + form.get_authors():
                 author = self.author_repository.create(commit=False, ds_meta_data_id=dsmetadata.id, **author_data)
                 dsmetadata.authors.append(author)
 
+            # Crear el dataset
             dataset = self.create(commit=False, user_id=current_user.id, ds_meta_data_id=dsmetadata.id)
 
+            # Inicializar métricas agregadas
+            total_feature_count = 0
+            total_product_count = 0
+
+            # Procesar cada modelo UVL del formulario
             for feature_model in form.feature_models:
                 uvl_filename = feature_model.uvl_filename.data
+
+                # Crear FMMetaData
                 fmmetadata = self.fmmetadata_repository.create(commit=False, **feature_model.get_fmmetadata())
+
+                # Agregar autores al modelo UVL
                 for author_data in feature_model.get_authors():
                     author = self.author_repository.create(commit=False, fm_meta_data_id=fmmetadata.id, **author_data)
                     fmmetadata.authors.append(author)
 
+                # Crear el modelo de características
                 fm = self.feature_model_repository.create(
                     commit=False, data_set_id=dataset.id, fm_meta_data_id=fmmetadata.id
                 )
 
-                # Procesar archivos en feature model
+                # Procesar el archivo UVL
                 file_path = os.path.join(current_user.temp_folder(), uvl_filename)
                 checksum, size = calculate_checksum_and_size(file_path)
 
-                # Contar características y productos en el archivo .uvl
+                # Contar características y productos en el archivo UVL
                 with open(file_path, 'r') as uvl_file:
                     uvl_content = uvl_file.read()
                     feature_count, product_count = count_features_and_products(uvl_content)
-                
-                # Guardar valores de conteo en ds_metrics
-                metrics = self.dsmetadata_repository.get_metrics(dsmetadata.id)
-                metrics.feature_count = feature_count
-                metrics.product_count = product_count
 
+                # Actualizar métricas agregadas
+                total_feature_count += feature_count
+                total_product_count += product_count
+
+                # Crear el archivo relacionado con el modelo
                 file = self.hubfilerepository.create(
                     commit=False, name=uvl_filename, checksum=checksum, size=size, feature_model_id=fm.id
                 )
                 fm.files.append(file)
+
+            # Actualizar DSMetrics con las métricas agregadas
+            metrics.feature_count += total_feature_count
+            metrics.product_count += total_product_count
+
+            # Guardar los cambios en la base de datos
             self.repository.session.commit()
         except Exception as exc:
-            logger.info(f"Exception creating dataset from form...: {exc}")
+            logger.error(f"Exception creating dataset from form: {exc}")
             self.repository.session.rollback()
             raise exc
+
         return dataset
 
     def update_dsmetadata(self, id, **kwargs):
