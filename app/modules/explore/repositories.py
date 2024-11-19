@@ -15,7 +15,23 @@ class ExploreRepository(BaseRepository):
         after_date=None, before_date=None, min_size=None, max_size=None, 
         min_features=None, max_features=None, min_products=None, max_products=None, **kwargs
     ):
-        # Inicializar consulta base
+        normalized_query = unidecode.unidecode(query).lower()
+        cleaned_query = re.sub(r'[,.":\'()\[\]^;!¡¿?]', "", normalized_query)
+
+        filters = []
+        for word in cleaned_query.split():
+            filters.append(DSMetaData.title.ilike(f"%{word}%"))
+            filters.append(DSMetaData.description.ilike(f"%{word}%"))
+            filters.append(Author.name.ilike(f"%{word}%"))
+            filters.append(Author.affiliation.ilike(f"%{word}%"))
+            filters.append(Author.orcid.ilike(f"%{word}%"))
+            filters.append(FMMetaData.uvl_filename.ilike(f"%{word}%"))
+            filters.append(FMMetaData.title.ilike(f"%{word}%"))
+            filters.append(FMMetaData.description.ilike(f"%{word}%"))
+            filters.append(FMMetaData.publication_doi.ilike(f"%{word}%"))
+            filters.append(FMMetaData.tags.ilike(f"%{word}%"))
+            filters.append(DSMetaData.tags.ilike(f"%{word}%"))
+
         datasets = (
             self.model.query
             .join(DataSet.ds_meta_data)
@@ -26,35 +42,19 @@ class ExploreRepository(BaseRepository):
             .filter(DSMetaData.dataset_doi.isnot(None))  # Excluir datasets con DOI vacío
         )
 
-        # Filtros de búsqueda general (query)
-        if query:
-            normalized_query = unidecode.unidecode(query).lower()
-            cleaned_query = re.sub(r'[,.":\'()\[\]^;!¡¿?]', "", normalized_query)
-
-            filters = []
-            for word in cleaned_query.split():
-                filters += [
-                    DSMetaData.title.ilike(f"%{word}%"),
-                    DSMetaData.description.ilike(f"%{word}%"),
-                    Author.name.ilike(f"%{word}%"),
-                    Author.affiliation.ilike(f"%{word}%"),
-                    Author.orcid.ilike(f"%{word}%"),
-                    FMMetaData.uvl_filename.ilike(f"%{word}%"),
-                    FMMetaData.title.ilike(f"%{word}%"),
-                    FMMetaData.description.ilike(f"%{word}%"),
-                    FMMetaData.publication_doi.ilike(f"%{word}%"),
-                    FMMetaData.tags.ilike(f"%{word}%"),
-                    DSMetaData.tags.ilike(f"%{word}%"),
-                ]
-            datasets = datasets.filter(or_(*filters))
-
-        # Filtro por tipo de publicación
+        # Filtro por tipo de publicacion
         if publication_type != "any":
-            matching_type = next((member for member in PublicationType if member.value.lower() == publication_type), None)
-            if matching_type:
-                datasets = datasets.filter(DSMetaData.publication_type == matching_type.name)
+            matching_type = None
+            for member in PublicationType:
+                if member.value.lower() == publication_type:
+                    matching_type = member
+                    break
+                
+                if matching_type is not None:
+                    datasets = datasets.filter(DSMetaData.publication_type == matching_type.name)
 
-        # Filtro por tags
+
+        # Apply tags filter if specified
         if tags:
             datasets = datasets.filter(or_(*[DSMetaData.tags.ilike(f"%{tag}%") for tag in tags]))
 
@@ -67,7 +67,6 @@ class ExploreRepository(BaseRepository):
             datasets = datasets.filter(DSMetrics.product_count >= min_products)
         if max_products is not None:
             datasets = datasets.filter(DSMetrics.product_count <= max_products)
-
 
         # Filtro de fechas
         if after_date and before_date:
@@ -84,10 +83,10 @@ class ExploreRepository(BaseRepository):
             if max_size is not None:
                 datasets = datasets.filter(DataSet.size_in_kb <= max_size)
 
-        # Ordenamiento
+        # Order by created_at
         if sorting == "oldest":
             datasets = datasets.order_by(DataSet.created_at.asc())
-        else:  # Default to "newest"
+        else:
             datasets = datasets.order_by(DataSet.created_at.desc())
 
         return datasets.all()
