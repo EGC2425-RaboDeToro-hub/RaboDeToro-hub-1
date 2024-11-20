@@ -1,18 +1,20 @@
-import re
 from sqlalchemy import any_, or_
 import unidecode
-from app.modules.dataset.models import Author, DSMetaData, DataSet, PublicationType
+from app.modules.dataset.models import Author, DSMetaData, DataSet, PublicationType, DSMetrics
 from app.modules.featuremodel.models import FMMetaData, FeatureModel
 from core.repositories.BaseRepository import BaseRepository
-
+import re
+from datetime import datetime
 
 class ExploreRepository(BaseRepository):
     def __init__(self):
         super().__init__(DataSet)
 
-    def filter(self, query="", sorting="newest", publication_type="any", tags=[], after_date=None, before_date=None,
-               min_size=None, max_size=None, **kwargs):
-        
+    def filter(
+        self, query="", sorting="newest", publication_type="any", tags=[], 
+        after_date=None, before_date=None, min_size=None, max_size=None, 
+        min_features=None, max_features=None, min_products=None, max_products=None, **kwargs
+    ):
         normalized_query = unidecode.unidecode(query).lower()
         cleaned_query = re.sub(r'[,.":\'()\[\]^;!¡¿?]', "", normalized_query)
 
@@ -36,24 +38,35 @@ class ExploreRepository(BaseRepository):
             .join(DSMetaData.authors)
             .join(DataSet.feature_models)
             .join(FeatureModel.fm_meta_data)
-            .filter(or_(*filters))
-            .filter(DSMetaData.dataset_doi.isnot(None))  
+            .join(DSMetaData.ds_metrics)
+            .filter(DSMetaData.dataset_doi.isnot(None))  # Excluir datasets con DOI vacío
         )
 
-        # Apply publication type filter if specified
+        # Filtro por tipo de publicacion
         if publication_type != "any":
             matching_type = None
             for member in PublicationType:
                 if member.value.lower() == publication_type:
                     matching_type = member
                     break
+                
+                if matching_type is not None:
+                    datasets = datasets.filter(DSMetaData.publication_type == matching_type.name)
 
-            if matching_type is not None:
-                datasets = datasets.filter(DSMetaData.publication_type == matching_type.name)
 
         # Apply tags filter if specified
         if tags:
-            datasets = datasets.filter(DSMetaData.tags.ilike(any_(f"%{tag}%" for tag in tags)))
+            datasets = datasets.filter(or_(*[DSMetaData.tags.ilike(f"%{tag}%") for tag in tags]))
+
+        # Filtros de métricas (características y productos)
+        if min_features is not None:
+            datasets = datasets.filter(DSMetrics.feature_count >= min_features)
+        if max_features is not None:
+            datasets = datasets.filter(DSMetrics.feature_count <= max_features)
+        if min_products is not None:
+            datasets = datasets.filter(DSMetrics.product_count >= min_products)
+        if max_products is not None:
+            datasets = datasets.filter(DSMetrics.product_count <= max_products)
 
         # Filtro de fechas
         if after_date and before_date:

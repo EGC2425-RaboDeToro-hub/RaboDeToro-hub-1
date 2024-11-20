@@ -15,6 +15,7 @@ from flask import (
     send_from_directory,
     make_response,
     abort,
+    send_file,
     url_for,
 )
 from flask_login import login_required, current_user
@@ -175,6 +176,17 @@ def delete():
 
     return jsonify({"error": "Error: File not found"})
 
+@dataset_bp.route("/dataset/<int:dataset_id>/metrics", methods=["GET"])
+def get_dataset_metrics(dataset_id):
+    dataset = dataset_service.get_or_404(dataset_id)
+    if dataset and dataset.ds_meta_data and dataset.ds_meta_data.ds_metrics:
+        return jsonify({
+            "feature_count": dataset.ds_meta_data.ds_metrics.feature_count,
+            "product_count": dataset.ds_meta_data.ds_metrics.product_count
+        })
+    else:
+        return jsonify({"error": "Dataset or metrics not found"}), 404
+
 
 @dataset_bp.route("/dataset/download/<int:dataset_id>", methods=["GET"])
 def download_dataset(dataset_id):
@@ -239,6 +251,18 @@ def download_dataset(dataset_id):
         )
 
     return resp
+
+
+@dataset_bp.route("/dataset/download/all", methods=["GET"])
+def download_all_dataset():
+    try:
+        zip_path = dataset_service.zip_all_datasets()
+        current_date = datetime.now().strftime("%Y_%m_%d")
+        zip_filename = f"uvlhub_bulk_{current_date}.zip"
+        return send_file(zip_path, as_attachment=True, download_name=zip_filename)
+    except Exception as e:
+        logger.error(f"Error al crear o enviar el archivo ZIP: {e}")
+        return jsonify({"error": "Error al generar el archivo de descarga"}), 500
 
 
 @dataset_bp.route("/doi/<path:doi>/", methods=["GET"])
