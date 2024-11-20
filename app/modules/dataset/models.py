@@ -3,6 +3,7 @@ from enum import Enum
 
 from flask import request
 from sqlalchemy import Enum as SQLAlchemyEnum
+from sqlalchemy.event import listens_for
 
 from app import db
 
@@ -49,12 +50,17 @@ class DSMetrics(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     number_of_models = db.Column(db.String(120))
     number_of_features = db.Column(db.String(120))
-    feature_count = db.Column(db.Integer, nullable=False, default=0)  # Nueva columna para el conteo de características
-    product_count = db.Column(db.Integer,  nullable=False, default=0)  # Nueva columna para el conteo de productos
+    feature_count = db.Column(db.Integer, nullable=False, default=0)  # Columna física
+    product_count = db.Column(db.Integer, nullable=False, default=0)  # Columna física
 
 
-    def __repr__(self):
-        return f'DSMetrics<models={self.number_of_models}, features={self.number_of_features}, feature_count={self.feature_count}, product_count={self.product_count}>'
+@listens_for(DSMetrics, 'before_insert')
+@listens_for(DSMetrics, 'before_update')
+def update_feature_and_product_count(mapper, connection, target):
+    """Actualiza feature_count y product_count antes de insertar o actualizar."""
+    target.feature_count = len(target.number_of_features.split(",")) if target.number_of_features else 0
+    target.product_count = len(target.number_of_models.split(",")) if target.number_of_models else 0
+
 
 class DSMetaData(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -68,28 +74,23 @@ class DSMetaData(db.Model):
     ds_metrics_id = db.Column(db.Integer, db.ForeignKey('ds_metrics.id'))
     ds_metrics = db.relationship('DSMetrics', uselist=False, backref='ds_meta_data', cascade="all, delete")
     authors = db.relationship('Author', backref='ds_meta_data', lazy=True, cascade="all, delete")
-    
+
     def __repr__(self):
         return f'DSMetaData<title={self.title}, metrics={self.ds_metrics}>'
-
+    
 
 class DataSet(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-
     ds_meta_data_id = db.Column(db.Integer, db.ForeignKey('ds_meta_data.id'), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    size_in_kb = db.Column(db.Float, nullable=False, default=0.0)
+    size_in_kb = db.Column(db.Float, nullable=False, default=0.0)  
 
     ds_meta_data = db.relationship('DSMetaData', backref=db.backref('data_set', uselist=False))
     feature_models = db.relationship('FeatureModel', backref='data_set', lazy=True, cascade="all, delete")
 
     def name(self):
         return self.ds_meta_data.title
-
-    def calculate_total_size(self):
-        """Calcula el tamaño total en KB de los archivos en los feature models"""
-        self.size_in_kb = sum(file.size for fm in self.feature_models for file in fm.files) / 1024
 
     def files(self):
         return [file for fm in self.feature_models for file in fm.files]
@@ -148,12 +149,19 @@ class DataSet(db.Model):
         return f'DataSet<{self.id}>'
 
 
+@listens_for(DataSet, 'before_insert')
+@listens_for(DataSet, 'before_update')
+def update_size_in_kb(mapper, connection, target):
+    """Actualiza size_in_kb antes de insertar o actualizar."""
+    target.size_in_kb = sum(file.size for fm in target.feature_models for file in fm.files) / 1024
+
+
 class DSDownloadRecord(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     dataset_id = db.Column(db.Integer, db.ForeignKey('data_set.id'))
     download_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    download_cookie = db.Column(db.String(36), nullable=False)  # Assuming UUID4 strings
+    download_cookie = db.Column(db.String(36), nullable=False)
 
     def __repr__(self):
         return (
@@ -169,7 +177,7 @@ class DSViewRecord(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     dataset_id = db.Column(db.Integer, db.ForeignKey('data_set.id'))
     view_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    view_cookie = db.Column(db.String(36), nullable=False)  # Assuming UUID4 strings
+    view_cookie = db.Column(db.String(36), nullable=False)
 
     def __repr__(self):
         return f'<View id={self.id} dataset_id={self.dataset_id} date={self.view_date} cookie={self.view_cookie}>'
