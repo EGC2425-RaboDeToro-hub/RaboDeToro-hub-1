@@ -15,13 +15,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      # Checkout the code
+      - uses: actions/checkout@f43a0e5 # SHA anclado para actions/checkout v3
 
+      # Validate Commit Messages
       - name: Validate Commit Messages
-        uses: wagoid/commitlint-github-action@v4
+        uses: wagoid/commitlint-github-action@4168451 # SHA anclado para commitlint-github-action v4
         with:
           configFile: commitlint.config.js
 
+      # Verify Message Rules
       - name: Verify Message Rules
         run: |
           npx commitlint --edit $(git log -1 --pretty=%B)
@@ -34,5 +37,4 @@ jobs:
               "subject-full-stop": [false],
               "header-max-length": [50],
               "body-max-line-length": [72],
-              "footer-max-line-length": [72]
-            }
+              "footer-max
