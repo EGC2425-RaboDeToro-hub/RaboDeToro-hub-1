@@ -1,0 +1,40 @@
+name: Commits Syntax Checker
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, edited, review_requested, synchronize]
+  push:
+    branches:
+      - "main"
+  workflow_call:
+
+jobs:
+  check:
+    name: Validate Commit Messages
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the code
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # SHA anclado para actions/checkout v3
+
+      # Validate Commit Messages
+      - name: Validate Commit Messages
+        uses: wagoid/commitlint-github-action@416045160973f9fff174ac6698412cfe7181c3f3 # SHA anclado para commitlint-github-action v4
+        with:
+          configFile: commitlint.config.js
+
+      # Verify Message Rules
+      - name: Verify Message Rules
+        run: |
+          npx commitlint --edit $(git log -1 --pretty=%B)
+        env:
+          CONVENTIONAL_COMMITS_RULES: |
+            {
+              "type-enum": ["feat", "fix", "docs", "style", "test"],
+              "subject-case": ["sentence-case"],
+              "subject-empty": [false],
+              "subject-full-stop": [false],
+              "header-max-length": [50],
+              "body-max-line-length": [72],
+              "footer-max
