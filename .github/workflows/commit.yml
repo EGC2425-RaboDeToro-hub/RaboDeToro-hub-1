@@ -2,12 +2,17 @@ name: Commits Syntax Checker
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, develop]  # Permitir PR hacia main y develop
     types: [opened, reopened, edited, review_requested, synchronize]
   push:
     branches:
       - "main"
-  workflow_call:
+      - "develop"  # Ejecutar también en pushes hacia develop
+  workflow_call:  # Dejarlo para ser invocado desde otros workflows si es necesario
+    inputs:
+      test_branch:
+        description: "The branch to test"
+        required: true
 
 jobs:
   check:
@@ -16,11 +21,11 @@ jobs:
 
     steps:
       # Checkout the code
-      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # SHA anclado para actions/checkout v3
+      - uses: actions/checkout@v4  # SHA es opcional, actualizando a versión 4 estable
 
       # Validate Commit Messages
       - name: Validate Commit Messages
-        uses: wagoid/commitlint-github-action@416045160973f9fff174ac6698412cfe7181c3f3 # SHA anclado para commitlint-github-action v4
+        uses: wagoid/commitlint-github-action@v4  # Usar la última versión estable de wagoid
         with:
           configFile: commitlint.config.js
 
@@ -37,4 +42,5 @@ jobs:
               "subject-full-stop": [false],
               "header-max-length": [50],
               "body-max-line-length": [72],
-              "footer-max
+              "footer-max-line-length": [72]
+            }
