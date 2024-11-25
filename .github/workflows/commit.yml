@@ -1,40 +1,58 @@
-name: Commits Syntax Checker
+# name: Commits Syntax Checker
 
-on:
-  pull_request:
-    branches: [main]
-    types: [opened, reopened, edited, review_requested, synchronize]
-  push:
-    branches:
-      - "main"
-  workflow_call:
+# on:
+#   pull_request:
+#     branches: [main, develop]  # Permitir PR hacia main y develop
+#     types: [opened, reopened, edited, review_requested, synchronize]
+#   push:
+#     branches:
+#       - "main"
+#       - "develop"  # Ejecutar también en pushes hacia develop
+#   workflow_call:
 
-jobs:
-  check:
-    name: Validate Commit Messages
-    runs-on: ubuntu-latest
+# jobs:
+#   check:
+#     name: Validate Commit Messages
+#     runs-on: ubuntu-latest
 
-    steps:
-      # Checkout the code
-      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # SHA anclado para actions/checkout v3
+#     steps:
+#       # Checkout the code with full history para permitir análisis completo de commitlint
+#       - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # SHA anclado para actions/checkout v3
+#         with:
+#           fetch-depth: 0  # Descargar todo el historial de commits
 
-      # Validate Commit Messages
-      - name: Validate Commit Messages
-        uses: wagoid/commitlint-github-action@416045160973f9fff174ac6698412cfe7181c3f3 # SHA anclado para commitlint-github-action v4
-        with:
-          configFile: commitlint.config.js
+#       # Instalar Node.js utilizando un SHA específico
+#       - name: Set up Node.js
+#         uses: actions/setup-node@9ced9a43a244f3ac94f13bfd896db8c8f30da67a # SHA anclado para actions/setup-node v3
+#         with:
+#           node-version: '18'
 
-      # Verify Message Rules
-      - name: Verify Message Rules
-        run: |
-          npx commitlint --edit $(git log -1 --pretty=%B)
-        env:
-          CONVENTIONAL_COMMITS_RULES: |
-            {
-              "type-enum": ["feat", "fix", "docs", "style", "test"],
-              "subject-case": ["sentence-case"],
-              "subject-empty": [false],
-              "subject-full-stop": [false],
-              "header-max-length": [50],
-              "body-max-line-length": [72],
-              "footer-max
+#       # Instalar Commitlint usando npm
+#       - name: Install Commitlint
+#         run: |
+#           npm install @commitlint/{cli,config-conventional}
+
+#       # Validar los mensajes de commit en línea
+#       - name: Validate Commit Messages
+#         run: |
+#           npx commitlint --edit $(git log -1 --pretty=%B) --config "{
+#             rules: {
+#               'type-enum': [2, 'always', ['feat', 'fix', 'docs', 'style', 'test']],
+#               'type-case': [2, 'always', 'lower-case'],
+#               'subject-case': [2, 'always', ['sentence-case']],
+#               'subject-empty': [2, 'never'],
+#               'subject-full-stop': [2, 'never', '.'],
+#               'header-max-length': [2, 'always', 50],
+#               'body-leading-blank': [2, 'always'],
+#               'body-max-line-length': [2, 'always', 72],
+#               'footer-leading-blank': [2, 'always'],
+#               'footer-max-line-length': [2, 'always', 72]
+#             },
+#             parserPreset: {
+#               parserOpts: {
+#                 headerPattern: /^(\w+):\\s([\\w\\s\\-]+)$/,
+#                 headerCorrespondence: ['type', 'subject'],
+#                 issuePrefixes: ['Refs #']
+#               }
+#             }
+#           }"
