@@ -9,10 +9,6 @@ on:
       - "main"
       - "develop"  # Ejecutar también en pushes hacia develop
   workflow_call:  # Dejarlo para ser invocado desde otros workflows si es necesario
-    inputs:
-      test_branch:
-        description: "The branch to test"
-        required: true
 
 jobs:
   check:
@@ -24,7 +20,7 @@ jobs:
 
       # Validate Commit Messages
       - name: Validate Commit Messages
-        uses: wagoid/commitlint-github-action@v4  # Usar la última versión estable de wagoid
+        uses: wagoid/commitlint-github-action@416045160973f9fff174ac6698412cfe7181c3f3 # SHA anclado para commitlint-github-action v4
         with:
           configFile: commitlint.config.js
 
