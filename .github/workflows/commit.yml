@@ -23,7 +23,7 @@ jobs:
 
       # Instalar Node.js utilizando un SHA específico
       - name: Set up Node.js
-        uses: actions/setup-node@8de35197020c9633f15e8db6a06f014a7b4d1bb2 # SHA anclado para actions/setup-node v3
+        uses: actions/setup-node@9ced9a43a244f3ac94f13bfd896db8c8f30da67a # SHA anclado para actions/setup-node v3
         with:
           node-version: '18'
 
