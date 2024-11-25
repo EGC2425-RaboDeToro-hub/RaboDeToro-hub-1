@@ -16,29 +16,43 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the code with full history to allow commitlint to analyze correctly
+      # Checkout the code with full history para permitir análisis completo de commitlint
       - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # SHA anclado para actions/checkout v3
         with:
           fetch-depth: 0  # Descargar todo el historial de commits
 
-      # Validate Commit Messages
-      - name: Validate Commit Messages
-        uses: wagoid/commitlint-github-action@416045160973f9fff174ac6698412cfe7181c3f3 # SHA anclado para commitlint-github-action v4
+      # Instalar Node.js utilizando un SHA específico
+      - name: Set up Node.js
+        uses: actions/setup-node@8de35197020c9633f15e8db6a06f014a7b4d1bb2 # SHA anclado para actions/setup-node v3
         with:
-          configFile: commitlint.config.js
+          node-version: '18'
 
-      # Verify Message Rules
-      - name: Verify Message Rules
+      # Instalar Commitlint usando npm
+      - name: Install Commitlint
         run: |
-          npx commitlint --edit $(git log -1 --pretty=%B)
-        env:
-          CONVENTIONAL_COMMITS_RULES: |
-            {
-              "type-enum": ["feat", "fix", "docs", "style", "test"],
-              "subject-case": ["sentence-case"],
-              "subject-empty": [false],
-              "subject-full-stop": [false],
-              "header-max-length": [50],
-              "body-max-line-length": [72],
-              "footer-max-line-length": [72]
+          npm install @commitlint/{cli,config-conventional}
+
+      # Validar los mensajes de commit en línea
+      - name: Validate Commit Messages
+        run: |
+          npx commitlint --edit $(git log -1 --pretty=%B) --config "{
+            rules: {
+              'type-enum': [2, 'always', ['feat', 'fix', 'docs', 'style', 'test']],
+              'type-case': [2, 'always', 'lower-case'],
+              'subject-case': [2, 'always', ['sentence-case']],
+              'subject-empty': [2, 'never'],
+              'subject-full-stop': [2, 'never', '.'],
+              'header-max-length': [2, 'always', 50],
+              'body-leading-blank': [2, 'always'],
+              'body-max-line-length': [2, 'always', 72],
+              'footer-leading-blank': [2, 'always'],
+              'footer-max-line-length': [2, 'always', 72]
+            },
+            parserPreset: {
+              parserOpts: {
+                headerPattern: /^(\w+):\\s([\\w\\s\\-]+)$/,
+                headerCorrespondence: ['type', 'subject'],
+                issuePrefixes: ['Refs #']
+              }
             }
+          }"
