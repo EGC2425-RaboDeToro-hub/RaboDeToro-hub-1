@@ -33,7 +33,7 @@ jobs:
       # Validar los mensajes de commit en línea
       - name: Validate Commit Messages
         run: |
-          npx commitlint --edit $(git log -1 --pretty=%B) --config "{
+          npx commitlint --edit --config "{
             rules: {
               'type-enum': [2, 'always', ['feat', 'fix', 'docs', 'style', 'test']],
               'type-case': [2, 'always', 'lower-case'],
@@ -48,7 +48,7 @@ jobs:
             },
             parserPreset: {
               parserOpts: {
-                headerPattern: /^(\w+):\\s([\\w\\s\\-]+)$/,
+                headerPattern: /^(\w+):\\s([a-zA-Z].*)$/,
                 headerCorrespondence: ['type', 'subject'],
                 issuePrefixes: ['Refs #']
               }
