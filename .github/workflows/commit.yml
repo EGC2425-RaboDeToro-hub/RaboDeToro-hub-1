@@ -1,4 +1,4 @@
-name: Commits Syntax Checker
+# name: Commits Syntax Checker
 
 on:
   pull_request:
@@ -10,11 +10,10 @@ on:
       - "develop"  # Ejecutar también en pushes hacia develop
   workflow_call:
 
-jobs:
-  check:
-    name: Validate Commit Messages
-    runs-on: ubuntu-latest
-
+ jobs:
+   check:
+     name: Validate Commit Messages
+     runs-on: ubuntu-latest
     steps:
       # Checkout the code with full history para permitir análisis completo de commitlint
       - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # SHA anclado para actions/checkout v3
