@@ -1,58 +1,58 @@
-# name: Commits Syntax Checker
+name: Commits Syntax Checker
 
-# on:
-#   pull_request:
-#     branches: [main, develop]  # Permitir PR hacia main y develop
-#     types: [opened, reopened, edited, review_requested, synchronize]
-#   push:
-#     branches:
-#       - "main"
-#       - "develop"  # Ejecutar también en pushes hacia develop
-#   workflow_call:
+on:
+  pull_request:
+    branches: [main, develop]  # Permitir PR hacia main y develop
+    types: [opened, reopened, edited, review_requested, synchronize]
+  push:
+    branches:
+      - "main"
+      - "develop"  # Ejecutar también en pushes hacia develop
+  workflow_call:
 
-# jobs:
-#   check:
-#     name: Validate Commit Messages
-#     runs-on: ubuntu-latest
+jobs:
+  check:
+    name: Validate Commit Messages
+    runs-on: ubuntu-latest
 
-#     steps:
-#       # Checkout the code with full history para permitir análisis completo de commitlint
-#       - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # SHA anclado para actions/checkout v3
-#         with:
-#           fetch-depth: 0  # Descargar todo el historial de commits
+    steps:
+      # Checkout the code with full history para permitir análisis completo de commitlint
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # SHA anclado para actions/checkout v3
+        with:
+          fetch-depth: 0  # Descargar todo el historial de commits
 
-#       # Instalar Node.js utilizando un SHA específico
-#       - name: Set up Node.js
-#         uses: actions/setup-node@9ced9a43a244f3ac94f13bfd896db8c8f30da67a # SHA anclado para actions/setup-node v3
-#         with:
-#           node-version: '18'
+      # Instalar Node.js utilizando un SHA específico
+      - name: Set up Node.js
+        uses: actions/setup-node@9ced9a43a244f3ac94f13bfd896db8c8f30da67a # SHA anclado para actions/setup-node v3
+        with:
+          node-version: '18'
 
-#       # Instalar Commitlint usando npm
-#       - name: Install Commitlint
-#         run: |
-#           npm install @commitlint/{cli,config-conventional}
+      # Instalar Commitlint usando npm
+      - name: Install Commitlint
+        run: |
+          npm install @commitlint/{cli,config-conventional}
 
-#       # Validar los mensajes de commit en línea
-#       - name: Validate Commit Messages
-#         run: |
-#           npx commitlint --edit $(git log -1 --pretty=%B) --config "{
-#             rules: {
-#               'type-enum': [2, 'always', ['feat', 'fix', 'docs', 'style', 'test']],
-#               'type-case': [2, 'always', 'lower-case'],
-#               'subject-case': [2, 'always', ['sentence-case']],
-#               'subject-empty': [2, 'never'],
-#               'subject-full-stop': [2, 'never', '.'],
-#               'header-max-length': [2, 'always', 50],
-#               'body-leading-blank': [2, 'always'],
-#               'body-max-line-length': [2, 'always', 72],
-#               'footer-leading-blank': [2, 'always'],
-#               'footer-max-line-length': [2, 'always', 72]
-#             },
-#             parserPreset: {
-#               parserOpts: {
-#                 headerPattern: /^(\w+):\\s([\\w\\s\\-]+)$/,
-#                 headerCorrespondence: ['type', 'subject'],
-#                 issuePrefixes: ['Refs #']
-#               }
-#             }
-#           }"
+      # Validar los mensajes de commit en línea
+      - name: Validate Commit Messages
+        run: |
+          npx commitlint --edit $(git log -1 --pretty=%B) --config "{
+            rules: {
+              'type-enum': [2, 'always', ['feat', 'fix', 'docs', 'style', 'test']],
+              'type-case': [2, 'always', 'lower-case'],
+              'subject-case': [2, 'always', ['sentence-case']],
+              'subject-empty': [2, 'never'],
+              'subject-full-stop': [2, 'never', '.'],
+              'header-max-length': [2, 'always', 50],
+              'body-leading-blank': [2, 'always'],
+              'body-max-line-length': [2, 'always', 72],
+              'footer-leading-blank': [2, 'always'],
+              'footer-max-line-length': [2, 'always', 72]
+            },
+            parserPreset: {
+              parserOpts: {
+                headerPattern: /^(\w+):\\s([\\w\\s\\-]+)$/,
+                headerCorrespondence: ['type', 'subject'],
+                issuePrefixes: ['Refs #']
+              }
+            }
+          }"
