@@ -26,7 +26,7 @@
 
     - name: Set permissions for init-testing-db.sh
       file:
-        path: "{{ working_dir }}scripts/init-testing-db.sh"
+        path: "{{ working_dir }}/scripts/init-testing-db.sh"
         mode: '0755'
         state: file
       environment: "{{ common_environment }}"

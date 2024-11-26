@@ -34,11 +34,21 @@
         executable: /bin/bash
       environment: "{{ common_environment }}"
 
+    - name: Add commands to .bashrc
+      lineinfile:
+        path: /home/vagrant/.bashrc
+        line: '{{ item }}'
+        create: yes
+      with_items:
+        - 'source {{ working_dir }}venv/bin/activate'
+        - 'cd {{ working_dir }}'
+      when: ansible_user == 'vagrant'
+      
     - name: Run Flask application
       shell: |
         source {{ working_dir }}venv/bin/activate
         cd {{ working_dir }}
-        nohup flask run --host=0.0.0.0 --port=5000 --reload --debug > app.log 2>&1 &
+        flask run --host=0.0.0.0 --port=5000 --reload --debug > app.log 2>&1 &
       args:
         executable: /bin/bash
       environment: "{{ common_environment }}"
