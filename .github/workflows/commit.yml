@@ -1,56 +1,98 @@
-name: Commits Syntax Checker
+name: Commit Syntax Validation
 
 on:
   pull_request:
-    branches: [main, develop]  # Permitir PR hacia main y develop
-    types: [opened, reopened, edited, review_requested, synchronize]
-  push:
-    branches:
-      - main
-      - develop  # Ejecutar también en pushes hacia develop
+    branches: [main, develop]
 
 jobs:
   check:
-    name: Validate Commit Messages
+    name: Validate Last Commit Message
     runs-on: ubuntu-latest
+
     steps:
-      # Checkout the code with full history para permitir análisis completo de commitlint
-      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # SHA anclado para actions/checkout v3
+      - name: Check out the code
+        uses: actions/checkout@v2
         with:
-          fetch-depth: 0  # Descargar todo el historial de commits
+          fetch-depth: 1  # Solo obtiene el último commit
 
-      # Instalar Node.js utilizando un SHA específico
-      - name: Set up Node.js
-        uses: actions/setup-node@9ced9a43a244f3ac94f13bfd896db8c8f30da67a # SHA anclado para actions/setup-node v3
-        with:
-          node-version: '18'
-
-      # Instalar Commitlint usando npm
-      - name: Install Commitlint
+      - name: Validate last commit message
         run: |
-          npm install @commitlint/{cli,config-conventional}
+          set -e
+          # Extraer el mensaje del último commit
+          message=$(git log -1 --pretty=%B)
 
-      # Validar los mensajes de commit en línea
-      - name: Validate Commit Messages
-        run: |
-          npx commitlint --edit --config "{
-            rules: {
-              'type-enum': [2, 'always', ['feat', 'fix', 'docs', 'style', 'test']],
-              'type-case': [2, 'always', 'lower-case'],
-              'subject-case': [2, 'always', ['sentence-case']],
-              'subject-empty': [2, 'never'],
-              'subject-full-stop': [2, 'never', '.'],
-              'header-max-length': [2, 'always', 50],
-              'body-leading-blank': [2, 'always'],
-              'body-max-line-length': [2, 'always', 72],
-              'footer-leading-blank': [2, 'always'],
-              'footer-max-line-length': [2, 'always', 72]
-            },
-            parserPreset: {
-              parserOpts: {
-                headerPattern: /^(\w+):\\s([a-zA-Z].*)$/,
-                headerCorrespondence: ['type', 'subject'],
-                issuePrefixes: ['Refs #']
-              }
-            }
-          }"
+          # Depuración: Mostrar el mensaje extraído
+          echo "Mensaje de commit extraído:"
+          echo "$message"
+
+          # Omitir merge commits
+          if [[ "$message" =~ ^Merge ]]; then
+            echo "Este es un merge commit. No se requiere validación."
+            exit 0
+          fi
+
+          # Validar separación entre asunto y cuerpo
+          if ! echo "$message" | grep -Pzo "(?s)^[^\n]+\n\n[^\n]+"; then
+            echo "Error: El mensaje de commit debe separar el asunto y el cuerpo con una línea en blanco."
+            exit 1
+          fi
+
+          # Extraer el asunto (primera línea)
+          subject=$(echo "$message" | head -n 1)
+
+          # Validar longitud del asunto
+          if [ ${#subject} -gt 50 ]; then
+            echo "Error: La línea del asunto debe tener un máximo de 50 caracteres."
+            echo "Asunto: $subject"
+            exit 1
+          fi
+
+          # Validar que el asunto comience con mayúscula
+          if ! [[ "$subject" =~ ^[A-Z] ]]; then
+            echo "Error: La línea del asunto debe comenzar con mayúscula."
+            echo "Asunto: $subject"
+            exit 1
+          fi
+
+          # Validar que el asunto no termine con un punto
+          if [[ "$subject" =~ \.$ ]]; then
+            echo "Error: La línea del asunto no debe terminar con un punto."
+            echo "Asunto: $subject"
+            exit 1
+          fi
+
+          # Validar uso del modo imperativo en el asunto
+          if [[ "$subject" =~ ^(Añadida|Corregida|Actualizada) ]]; then
+            echo "Error: La línea del asunto debe usar el modo imperativo."
+            echo "Asunto: $subject"
+            exit 1
+          fi
+
+          # Validar longitud de las líneas del cuerpo
+          body=$(echo "$message" | tail -n +3)
+          while IFS= read -r line; do
+            if [ ${#line} -gt 72 ]; then
+              echo "Error: Las líneas del cuerpo deben tener un máximo de 72 caracteres."
+              echo "Línea larga: $line"
+              exit 1
+            fi
+          done <<< "$body"
+
+          # Validar prefijos de tipo
+          if ! [[ "$subject" =~ ^(feat|fix|docs|style|test): ]]; then
+            echo "Error: El asunto debe comenzar con uno de los prefijos permitidos (feat, fix, docs, style, test)."
+            echo "Asunto: $subject"
+            exit 1
+          fi
+
+          # Validar presencia de pie de commit si aplica
+          if echo "$message" | grep -q "Refs #"; then
+            footer=$(echo "$message" | tail -n 1)
+            if ! [[ "$footer" =~ ^Refs #(null|[0-9]+)$ ]]; then
+              echo "Error: El pie del commit debe seguir el formato 'Refs #numero-issue' o 'Refs #null'."
+              echo "Pie: $footer"
+              exit 1
+            fi
+          fi
+
+          echo "El mensaje del último commit es válido."
