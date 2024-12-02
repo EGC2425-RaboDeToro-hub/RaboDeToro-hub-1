@@ -22,7 +22,7 @@ def load_env(file)
 end
 
 # Load .env file from the top level and get the loaded variables
-env_file_path = File.expand_path("../../.env", __FILE__)
+env_file_path = File.expand_path("../.env.vagrant", __FILE__)
 puts "Loading .env file from: #{env_file_path}"
 loaded_env_vars = load_env(env_file_path)
 
