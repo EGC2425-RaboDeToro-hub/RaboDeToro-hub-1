@@ -25,6 +25,12 @@ jobs:
           echo "Mensaje de commit extraído:"
           echo "$message"
 
+          # Omitir merge commits
+          if [[ "$message" =~ ^Merge ]]; then
+            echo "Este es un merge commit. No se requiere validación."
+            exit 0
+          fi
+
           # Validar separación entre asunto y cuerpo
           if ! echo "$message" | grep -Pzo "(?s)^[^\n]+\n\n[^\n]+"; then
             echo "Error: El mensaje de commit debe separar el asunto y el cuerpo con una línea en blanco."
