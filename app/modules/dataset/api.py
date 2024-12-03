@@ -28,6 +28,7 @@ DataSetResource = create_resource(DataSet, dataset_serializer)
 # Repositorio de datasets
 dataset_repository = DataSetRepository()
 
+
 # Recurso de búsqueda filtrada de datasets
 class FilteredDataSetResource(Resource):
     def get(self):
@@ -35,7 +36,7 @@ class FilteredDataSetResource(Resource):
         max_features = request.args.get('max_features', type=int)
         min_products = request.args.get('min_products', type=int)
         max_products = request.args.get('max_products', type=int)
-        
+
         # Filtrar datasets utilizando el método del repositorio
         datasets = dataset_repository.filter_datasets(
             min_features=min_features,
@@ -43,10 +44,11 @@ class FilteredDataSetResource(Resource):
             min_products=min_products,
             max_products=max_products
         )
-        
+
         # Serializar los datasets filtrados
         serialized_datasets = [dataset_serializer.serialize(dataset) for dataset in datasets]
         return serialized_datasets, 200
+
 
 # Registrar recursos en el blueprint
 def init_blueprint_api(api):

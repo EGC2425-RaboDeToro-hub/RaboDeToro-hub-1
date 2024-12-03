@@ -43,7 +43,7 @@ def resetPassword(token):
         return redirect(url_for("auth.login"))
 
     if request.method == "POST":
-        password = request.form["password"] 
+        password = request.form["password"]
         forgotPasswordService.resetPassword(email=email, password=password)
         forgotPasswordService.usedToken(token)
         flash("Password successfully changed!", "success")
