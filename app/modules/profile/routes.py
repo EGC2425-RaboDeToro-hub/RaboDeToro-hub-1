@@ -2,8 +2,6 @@ from app.modules.auth.services import AuthenticationService
 from app.modules.dataset.models import DataSet, Author, DSMetaData
 from flask import render_template, redirect, url_for, request
 from flask_login import login_required, current_user
-from app.modules.dataset.repositories import AuthorRepository, DataSetRepository
-
 from app import db
 from app.modules.profile import profile_bp
 from app.modules.profile.forms import UserProfileForm
@@ -59,8 +57,9 @@ def my_profile():
 def proyectos_autor(author_id):
     author = Author.query.get(author_id)
     if not author:
-        return abort(404)
+        return "Autor no encontrado", 404
     
     datasets = DataSet.query.join(DSMetaData).filter(DSMetaData.authors.any(id=author_id)).all()
 
     return render_template('profile/author_projects.html', author=author, datasets=datasets)
+

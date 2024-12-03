@@ -48,3 +48,53 @@ class TestPruebaFiltros:
         self.driver.find_element(By.ID, "min_size").click()
         self.driver.find_element(By.ID, "min_size").send_keys("1")
         self.driver.find_element(By.ID, "clear-filters").click()
+
+    def test_filter_by_features(self):
+        self.driver.get("http://127.0.0.1:5000/")
+        self.driver.set_window_size(1854, 1048)
+
+        # Navegar a la sección "Explore"
+        element = WebDriverWait(self.driver, 10).until(
+            EC.element_to_be_clickable((By.CSS_SELECTOR, ".sidebar-item:nth-child(3) .align-middle:nth-child(2)"))
+        )
+        element.click()
+
+        # Probar el filtro por características
+        self.driver.find_element(By.ID, "min_features").click()
+        self.driver.find_element(By.ID, "min_features").send_keys("5")
+        self.driver.find_element(By.ID, "clear-filters").click()
+
+        self.driver.find_element(By.ID, "max_features").click()
+        self.driver.find_element(By.ID, "max_features").send_keys("10")
+        self.driver.find_element(By.ID, "clear-filters").click()
+
+        self.driver.find_element(By.ID, "min_features").click()
+        self.driver.find_element(By.ID, "min_features").send_keys("2")
+        self.driver.find_element(By.ID, "max_features").click()
+        self.driver.find_element(By.ID, "max_features").send_keys("8")
+        self.driver.find_element(By.ID, "clear-filters").click()
+
+    def test_filter_by_products(self):
+        self.driver.get("http://127.0.0.1:5000/")
+        self.driver.set_window_size(1854, 1048)
+
+        # Navegar a la sección "Explore"
+        element = WebDriverWait(self.driver, 10).until(
+            EC.element_to_be_clickable((By.CSS_SELECTOR, ".sidebar-item:nth-child(3) .align-middle:nth-child(2)"))
+        )
+        element.click()
+
+        # Probar el filtro por número de productos
+        self.driver.find_element(By.ID, "min_products").click()
+        self.driver.find_element(By.ID, "min_products").send_keys("50")
+        self.driver.find_element(By.ID, "clear-filters").click()
+
+        self.driver.find_element(By.ID, "max_products").click()
+        self.driver.find_element(By.ID, "max_products").send_keys("200")
+        self.driver.find_element(By.ID, "clear-filters").click()
+
+        self.driver.find_element(By.ID, "min_products").click()
+        self.driver.find_element(By.ID, "min_products").send_keys("10")
+        self.driver.find_element(By.ID, "max_products").click()
+        self.driver.find_element(By.ID, "max_products").send_keys("100")
+        self.driver.find_element(By.ID, "clear-filters").click()

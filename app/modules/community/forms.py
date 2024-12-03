@@ -10,7 +10,7 @@ class CreateCommunityForm(FlaskForm):
 
 
 class FindCommunityForm(FlaskForm):
-    code = StringField('Code', validators=[DataRequired()])
+    joinCode = StringField('joinCode', validators=[DataRequired()])
 
 
 class UpdateCommunityForm(FlaskForm):

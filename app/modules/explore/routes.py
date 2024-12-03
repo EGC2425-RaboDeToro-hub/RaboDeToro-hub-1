@@ -15,7 +15,7 @@ def index():
         sorting = request.args.get('sorting', 'newest')
         publication_type = request.args.get('publication_type', 'any')
         tags = request.args.getlist('tags')
-        
+
         # Convertir las fechas a datetime si están presentes y ajustar la hora
         if after_date:
             try:
@@ -40,7 +40,7 @@ def index():
             after_date=after_date,
             before_date=before_date
         )
-        
+
         form = ExploreForm()
         return render_template('explore/index.html', form=form, query=query, datasets=datasets)
 
