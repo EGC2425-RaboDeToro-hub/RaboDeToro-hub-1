@@ -1,0 +1,39 @@
+name: "Tarea Técnica"
+description: "Crea una issue para una tarea técnica específica sin detalles adicionales innecesarios."
+title: "<Nombre de la tarea>"
+body:
+  - type: markdown
+    attributes:
+      value: "### 📝 Descripción\n---\nProporciona una descripción breve de la tarea."
+
+  - type: textarea
+    id: description
+    attributes:
+      label: "Descripción de la tarea"
+      description: "Describe qué se debe realizar en esta tarea."
+      placeholder: "Ejemplo: Crear un script de construcción utilizando Vagrant para configurar el entorno de desarrollo."
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: "### 🏷️ Etiquetas y Prioridad\n---\nAsigna etiquetas, prioridad y milestone para esta tarea."
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: "Prioridad"
+      description: "Selecciona la prioridad de la tarea."
+      options:
+        - Alta (high Priority)
+        - Media (medium Priority)
+        - Baja (low Priority)
+
+  - type: dropdown
+    id: milestone
+    attributes:
+      label: "Milestone"
+      description: "Selecciona el milestone al que pertenece esta tarea."
+      options:
+        - M2
+        - M3
