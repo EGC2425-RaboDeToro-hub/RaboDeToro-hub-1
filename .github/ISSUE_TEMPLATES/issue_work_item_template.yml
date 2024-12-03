@@ -1,0 +1,49 @@
+name: "Work Item Template"
+description: "Crea un Work Item (WI) sin detalles adicionales innecesarios."
+title: "WI - <nombre WI>"
+body:
+  - type: markdown
+    attributes:
+      value: "### ✏️ Descripción\n---\nProporciona una descripción breve de este WI."
+
+  - type: textarea
+    id: description
+    attributes:
+      label: "Descripción"
+      description: "Describe brevemente el propósito del WI."
+      placeholder: "Ejemplo: Permitir filtrar datasets por número de características."
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: "### 🏷️ Etiquetas y Milestone\n---\nAsigna prioridad, dificultad, y milestone a este WI."
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: "Prioridad"
+      description: "Selecciona la prioridad del WI."
+      options:
+        - Alta (high Priority)
+        - Media (medium Priority)
+        - Baja (low Priority)
+
+  - type: dropdown
+    id: difficulty
+    attributes:
+      label: "Dificultad"
+      description: "Selecciona la dificultad del WI."
+      options:
+        - Difícil (hard)
+        - Media (medium)
+        - Baja (low)
+
+  - type: dropdown
+    id: milestone
+    attributes:
+      label: "Milestone"
+      description: "Selecciona el milestone al que pertenece este WI."
+      options:
+        - M2
+        - M3
