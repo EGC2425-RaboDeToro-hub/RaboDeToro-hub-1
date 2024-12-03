@@ -77,14 +77,14 @@ class DSMetaData(db.Model):
 
     def __repr__(self):
         return f'DSMetaData<title={self.title}, metrics={self.ds_metrics}>'
-    
+
 
 class DataSet(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     ds_meta_data_id = db.Column(db.Integer, db.ForeignKey('ds_meta_data.id'), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    size_in_kb = db.Column(db.Float, nullable=False, default=0.0)  
+    size_in_kb = db.Column(db.Float, nullable=False, default=0.0)
 
     ds_meta_data = db.relationship('DSMetaData', backref=db.backref('data_set', uselist=False))
     feature_models = db.relationship('FeatureModel', backref='data_set', lazy=True, cascade="all, delete")

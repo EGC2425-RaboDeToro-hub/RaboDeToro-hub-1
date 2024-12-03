@@ -16,7 +16,7 @@ def test_filter_by_date_range(explore_service):
 
         after_date = datetime(2023, 1, 1)
         before_date = datetime(2023, 12, 31)
-        
+
         # Llama al método del servicio
         result = explore_service.filter(after_date=after_date, before_date=before_date)
 
@@ -35,7 +35,7 @@ def test_filter_by_size_range(explore_service):
 
         min_size = 100.0  # Tamaño mínimo en KB
         max_size = 5000.0  # Tamaño máximo en KB
-        
+
         # Llama al método del servicio
         result = explore_service.filter(min_size=min_size, max_size=max_size)
 
@@ -56,15 +56,15 @@ def test_filter_by_date_and_size_range(explore_service):
         before_date = datetime(2023, 12, 31)
         min_size = 200.0
         max_size = 4000.0
-        
+
         # Llama al método del servicio con ambos filtros aplicados
-        result = explore_service.filter(after_date=after_date, before_date=before_date, min_size=min_size, 
+        result = explore_service.filter(after_date=after_date, before_date=before_date, min_size=min_size,
                                         max_size=max_size)
 
         # Verifica que los resultados y las llamadas sean correctas
         assert result == mock_datasets
         assert len(result) == 1
         mock_filter.assert_called_once_with(
-            "", "newest", "any", [], after_date=after_date, before_date=before_date, min_size=min_size, 
+            "", "newest", "any", [], after_date=after_date, before_date=before_date, min_size=min_size,
             max_size=max_size
         )

@@ -21,7 +21,7 @@ def test_download_all_datasets(test_client):
     assert response.headers["Content-Type"] == "application/zip"
 
     logout(test_client)
-    
+
 
 def test_filter_datasets_by_features(test_client):
     # Test filtering by features
