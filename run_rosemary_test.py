@@ -1,13 +1,21 @@
 import subprocess
 import sys
 
-# Definir comandos estáticos
-SELENIUM_COMMAND = ["rosemary", "selenium"]
-COVERAGE_COMMAND = ["rosemary", "coverage"]
-LOCUST_COMMAND = ["rosemary", "locust"]
+# Definir comandos como tuplas inmutables
+ALLOWED_COMMANDS = {
+    "selenium": ("rosemary", "selenium"),
+    "coverage": ("rosemary", "coverage"),
+    "locust": ("rosemary", "locust"),
+}
+
+def validate_command(command):
+    """Valida que el comando esté dentro de los permitidos."""
+    if command not in ALLOWED_COMMANDS.values():
+        raise ValueError(f"Comando no permitido: {command}")
 
 def run_command(command):
     """Ejecuta un comando definido de forma segura y maneja errores."""
+    validate_command(command)  # Validar el comando
     try:
         result = subprocess.run(
             command,
@@ -28,19 +36,19 @@ def run_command(command):
 def run_rosemary_selenium():
     """Ejecuta pruebas Selenium con Rosemary."""
     print("Ejecutando pruebas Selenium con Rosemary...")
-    run_command(SELENIUM_COMMAND)
+    run_command(ALLOWED_COMMANDS["selenium"])
 
 
 def run_rosemary_coverage():
     """Ejecuta pruebas con cobertura utilizando Rosemary."""
     print("Ejecutando pruebas de cobertura con Rosemary...")
-    run_command(COVERAGE_COMMAND)
+    run_command(ALLOWED_COMMANDS["coverage"])
 
 
 def run_rosemary_locust():
     """Ejecuta pruebas de rendimiento (Locust) con Rosemary."""
     print("Ejecutando pruebas de rendimiento con Rosemary...")
-    run_command(LOCUST_COMMAND)
+    run_command(ALLOWED_COMMANDS["locust"])
 
 
 def main():
