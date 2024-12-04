@@ -1,9 +1,13 @@
 import subprocess
 import sys
 
+# Definir comandos estáticos
+SELENIUM_COMMAND = ["rosemary", "selenium"]
+COVERAGE_COMMAND = ["rosemary", "coverage"]
+LOCUST_COMMAND = ["rosemary", "locust"]
 
 def run_command(command):
-    """Ejecuta un comando de forma segura y maneja errores."""
+    """Ejecuta un comando definido de forma segura y maneja errores."""
     try:
         result = subprocess.run(
             command,
@@ -24,19 +28,19 @@ def run_command(command):
 def run_rosemary_selenium():
     """Ejecuta pruebas Selenium con Rosemary."""
     print("Ejecutando pruebas Selenium con Rosemary...")
-    run_command(["rosemary", "selenium"])
+    run_command(SELENIUM_COMMAND)
 
 
 def run_rosemary_coverage():
     """Ejecuta pruebas con cobertura utilizando Rosemary."""
     print("Ejecutando pruebas de cobertura con Rosemary...")
-    run_command(["rosemary", "coverage"])
+    run_command(COVERAGE_COMMAND)
 
 
 def run_rosemary_locust():
     """Ejecuta pruebas de rendimiento (Locust) con Rosemary."""
     print("Ejecutando pruebas de rendimiento con Rosemary...")
-    run_command(["rosemary", "locust"])
+    run_command(LOCUST_COMMAND)
 
 
 def main():
