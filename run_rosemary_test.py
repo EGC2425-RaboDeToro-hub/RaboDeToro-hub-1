@@ -2,52 +2,41 @@ import subprocess
 import sys
 
 
+def run_command(command):
+    """Ejecuta un comando de forma segura y maneja errores."""
+    try:
+        result = subprocess.run(
+            command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            check=True,  # Lanza excepción si el comando falla
+        )
+        print(result.stdout)
+    except subprocess.CalledProcessError as e:
+        print(f"Error ejecutando {command[0]}: {e.stderr.strip()}")
+        sys.exit(e.returncode)
+    except FileNotFoundError:
+        print(f"Comando no encontrado: {command[0]}")
+        sys.exit(1)
+
+
 def run_rosemary_selenium():
     """Ejecuta pruebas Selenium con Rosemary."""
     print("Ejecutando pruebas Selenium con Rosemary...")
-    result = subprocess.run(
-        ["rosemary", "selenium"],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-    )
-    print(result.stdout)
-    if result.returncode != 0:
-        print(result.stderr)
-        print("Pruebas Selenium fallaron.")
-        sys.exit(1)
+    run_command(["rosemary", "selenium"])
 
 
 def run_rosemary_coverage():
     """Ejecuta pruebas con cobertura utilizando Rosemary."""
     print("Ejecutando pruebas de cobertura con Rosemary...")
-    result = subprocess.run(
-        ["rosemary", "coverage"],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-    )
-    print(result.stdout)
-    if result.returncode != 0:
-        print(result.stderr)
-        print("Pruebas de cobertura fallaron.")
-        sys.exit(1)
+    run_command(["rosemary", "coverage"])
 
 
 def run_rosemary_locust():
     """Ejecuta pruebas de rendimiento (Locust) con Rosemary."""
     print("Ejecutando pruebas de rendimiento con Rosemary...")
-    result = subprocess.run(
-        ["rosemary", "locust"],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-    )
-    print(result.stdout)
-    if result.returncode != 0:
-        print(result.stderr)
-        print("Pruebas de rendimiento fallaron.")
-        sys.exit(1)
+    run_command(["rosemary", "locust"])
 
 
 def main():
