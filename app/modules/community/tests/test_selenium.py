@@ -44,27 +44,3 @@ class TestCommunity:
         self.driver.find_element(By.ID, "joinCode").send_keys("testcode")
         self.driver.find_element(By.CSS_SELECTOR, "button[type='submit']").click()
         time.sleep(2)
-
-#   def test_update_community(self):
-#       self.login()
-#       self.driver.get("http://localhost:5000/community/update/1")  # Replace with a valid community ID
-#       time.sleep(2)
-#       self.driver.find_element(By.ID, "name").click()
-#       self.driver.find_element(By.ID, "name").clear()
-#       self.driver.find_element(By.ID, "name").send_keys("Updated Community")
-#       self.driver.find_element(By.ID, "description").click()
-#       self.driver.find_element(By.ID, "description").clear()
-#       self.driver.find_element(By.ID, "description").send_keys("Updated Description")
-#       self.driver.find_element(By.ID, "code").click()
-#       self.driver.find_element(By.ID, "code").clear()
-#       self.driver.find_element(By.ID, "code").send_keys("updatedCode")
-#       self.driver.find_element(By.CSS_SELECTOR, "button[type='submit']").click()
-#       time.sleep(2)
-
-#   def test_delete_community(self):
-#       self.login()
-#       self.driver.get("http://localhost:5000/community/1")  # Replace with a valid community ID
-#       time.sleep(2)
-#       self.driver.find_element(By.CSS_SELECTOR, "form[action='/community/delete/1'] button[type='submit']").click()
-#        time.sleep(2)
-#
