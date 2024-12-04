@@ -11,7 +11,7 @@ from app.modules.dataset.models import (
     DSDownloadRecord,
     DSMetaData,
     DSViewRecord,
-    DataSet,  
+    DataSet,
     DSMetrics
 )
 from core.repositories.BaseRepository import BaseRepository
@@ -120,10 +120,10 @@ class DataSetRepository(BaseRepository):
             .limit(5)
             .all()
         )
-    
+
     def filter_datasets(self, min_features=None, max_features=None, min_products=None, max_products=None):
         query = DataSet.query.join(DataSet.ds_meta_data).join(DSMetaData.ds_metrics)
-        
+
         if min_features is not None:
             query = query.filter(DSMetrics.feature_count >= min_features)
         if max_features is not None:
@@ -132,7 +132,7 @@ class DataSetRepository(BaseRepository):
             query = query.filter(DSMetrics.product_count >= min_products)
         if max_products is not None:
             query = query.filter(DSMetrics.product_count <= max_products)
-        
+
         return query.all()
 
 

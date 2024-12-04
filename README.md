@@ -1,7 +1,4 @@
 <div align="center">
-
-  <a href="">[![Pytest Testing Suite](https://github.com/diverso-lab/uvlhub/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/diverso-lab/uvlhub/actions/workflows/tests.yml)</a>
-  <a href="">[![Commits Syntax Checker](https://github.com/diverso-lab/uvlhub/actions/workflows/commits.yml/badge.svg?branch=main)](https://github.com/diverso-lab/uvlhub/actions/workflows/commits.yml)</a><br>
   <img src="https://github.com/user-attachments/assets/2780ac75-1f64-48db-b317-0b2e3006e1d5" alt="image" width="600"/>
 </div>
 
@@ -54,9 +51,8 @@ Algunas de las nuevas integraciones son los "Work Items":
   ![Create Comunities](./images/comunidades.png)
 
 
-- **Fakenodo:** Podremos buscar datasets de la API que nos ofrece fakenodo.
+- **Fakenodo:** Redirigimos las llamadas a zenodo a fakenodo para evitar sobresaturar la red.
 
-![fakenodo](URL_de_la_imagen)
 
 ### Enlaces de despliegue del proyecto:
 - **Render:**  [ https://rabodetoro-hub-1.onrender.com](https://rabodetoro-hub-1.onrender.com)

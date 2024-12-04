@@ -57,7 +57,8 @@ class DatasetFilterBehavior(TaskSet):
         """
         min_features = 5
         max_features = 20
-        with self.client.get(f"/api/v1/datasets/filtered?min_features={min_features}&max_features={max_features}", catch_response=True) as response:
+        with self.client.get(f"/api/v1/datasets/filtered?min_features={min_features}&max_features={max_features}",
+                             catch_response=True) as response:
             if response.status_code == 200:
                 data = response.json()
                 # Verifica que todos los datasets tienen el número de características dentro del rango
@@ -74,7 +75,8 @@ class DatasetFilterBehavior(TaskSet):
         """
         min_products = 30
         max_products = 60
-        with self.client.get(f"/api/v1/datasets/filtered?min_products={min_products}&max_products={max_products}", catch_response=True) as response:
+        with self.client.get(f"/api/v1/datasets/filtered?min_products={min_products}&max_products={max_products}",
+                             catch_response=True) as response:
             if response.status_code == 200:
                 data = response.json()
                 # Verifica que todos los datasets tienen el número de productos dentro del rango
@@ -86,7 +88,8 @@ class DatasetFilterBehavior(TaskSet):
 
 class DatasetUser(HttpUser):
     """
-    Usuario Locust que ejecuta las tareas de las clases DatasetBehavior, AdditionalDatasetBehavior y DatasetFilterBehavior.
+    Usuario Locust que ejecuta las tareas de las clases DatasetBehavior, AdditionalDatasetBehavior y
+    DatasetFilterBehavior.
     """
     tasks = [DatasetBehavior, AdditionalDatasetBehavior, DatasetFilterBehavior]
     min_wait = 5000

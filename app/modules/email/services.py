@@ -10,7 +10,7 @@ class EmailService(BaseService):
         super().__init__(EmailRepository())
         self.sender = None
         self.mail = None
-    
+
     def init_app(self, app):
         # Carga las variables de entorno desde el archivo .env
         load_dotenv()
@@ -22,7 +22,7 @@ class EmailService(BaseService):
         app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME")
         app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")
         app.config["MAIL_DEFAULT_SENDER"] = os.getenv("MAIL_DEFAULT_SENDER")
-        
+
         self.mail = Mail(app)
         self.sender = app.config["MAIL_USERNAME"]
 
