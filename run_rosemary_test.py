@@ -1,5 +1,6 @@
 import subprocess
 import sys
+from shlex import quote
 
 # Definir comandos como listas estáticas
 ALLOWED_COMMANDS = {
@@ -21,8 +22,10 @@ def run_command(command):
     """Ejecuta un comando definido de forma segura y maneja errores."""
     try:
         validate_command(command)  # Validar el comando
+        # Sanitizar los argumentos del comando
+        sanitized_command = [quote(arg) for arg in command]
         result = subprocess.run(
-            command,
+            sanitized_command,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
