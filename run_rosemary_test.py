@@ -1,6 +1,6 @@
 import subprocess
 import sys
-from shlex import quote
+from shlex import quote  # Importamos para sanitizar argumentos
 
 # Definir comandos como listas estáticas
 ALLOWED_COMMANDS = {
@@ -10,20 +10,21 @@ ALLOWED_COMMANDS = {
 }
 
 
-def validate_command(command):
-    """Valida que el comando esté dentro de los permitidos."""
-    if not isinstance(command, list) or len(command) == 0:
-        raise ValueError("El comando debe ser una lista no vacía.")
-    if command not in ALLOWED_COMMANDS.values():
-        raise ValueError(f"Comando no permitido: {command}")
+def validate_command(command_key):
+    """Valida que la clave del comando esté dentro de los permitidos."""
+    if command_key not in ALLOWED_COMMANDS:
+        raise ValueError(f"Comando no permitido: {command_key}")
+    return ALLOWED_COMMANDS[command_key]
 
 
-def run_command(command):
-    """Ejecuta un comando definido de forma segura y maneja errores."""
+def run_command(command_key):
+    """Ejecuta un comando de forma segura después de validarlo."""
     try:
-        validate_command(command)  # Validar el comando
-        # Sanitizar los argumentos del comando
+        # Validar el comando y obtener la lista de argumentos
+        command = validate_command(command_key)
+        # Sanitizar los argumentos para evitar problemas de seguridad
         sanitized_command = [quote(arg) for arg in command]
+        # Ejecutar el comando
         result = subprocess.run(
             sanitized_command,
             stdout=subprocess.PIPE,
@@ -36,29 +37,29 @@ def run_command(command):
         print(f"Error de validación: {ve}")
         sys.exit(1)
     except subprocess.CalledProcessError as e:
-        print(f"Error ejecutando {command[0]}: {e.stderr.strip()}")
+        print(f"Error ejecutando {command_key}: {e.stderr.strip()}")
         sys.exit(e.returncode)
     except FileNotFoundError:
-        print(f"Comando no encontrado: {command[0]}")
+        print(f"Comando no encontrado: {command_key}")
         sys.exit(1)
 
 
 def run_rosemary_selenium():
     """Ejecuta pruebas Selenium con Rosemary."""
     print("Ejecutando pruebas Selenium con Rosemary...")
-    run_command(ALLOWED_COMMANDS["selenium"])
+    run_command("selenium")
 
 
 def run_rosemary_coverage():
     """Ejecuta pruebas con cobertura utilizando Rosemary."""
     print("Ejecutando pruebas de cobertura con Rosemary...")
-    run_command(ALLOWED_COMMANDS["coverage"])
+    run_command("coverage")
 
 
 def run_rosemary_locust():
     """Ejecuta pruebas de rendimiento (Locust) con Rosemary."""
     print("Ejecutando pruebas de rendimiento con Rosemary...")
-    run_command(ALLOWED_COMMANDS["locust"])
+    run_command("locust")
 
 
 def main():
