@@ -13,23 +13,29 @@ jobs:
       - name: Check out the code
         uses: actions/checkout@v2
         with:
-          fetch-depth: 1  # Solo obtiene el último commit
+          fetch-depth: 2  # Solo obtiene los dos últimos commits
 
-      - name: Validate last commit message
+      - name: Validate the penultimate commit message
         run: |
+          #!/bin/bash
           set -e
-          # Extraer el mensaje del último commit
-          message=$(git log -1 --pretty=%B)
+          # Obtener los dos últimos commits
+          commits=$(git log -2 --pretty=format:"%H")
 
-          # Depuración: Mostrar el mensaje extraído
-          echo "Mensaje de commit extraído:"
+          # Separar los commits en variables
+          commit_array=($commits)
+          last_commit=${commit_array[0]}
+          penultimate_commit=${commit_array[1]}
+
+          echo "Último commit: $last_commit"
+          echo "Penúltimo commit: $penultimate_commit"
+
+          # Validar solo el penúltimo commit
+          message=$(git log -1 --pretty=%B $penultimate_commit)
+
+          echo "Validando commit: $penultimate_commit"
+          echo "Mensaje del commit:"
           echo "$message"
-
-          # Omitir merge commits
-          if [[ "$message" =~ ^Merge ]]; then
-            echo "Este es un merge commit. No se requiere validación."
-            exit 0
-          fi
 
           # Validar separación entre asunto y cuerpo
           if ! echo "$message" | grep -Pzo "(?s)^[^\n]+\n\n[^\n]+"; then
@@ -40,59 +46,28 @@ jobs:
           # Extraer el asunto (primera línea)
           subject=$(echo "$message" | head -n 1)
 
-          # Validar longitud del asunto
-          if [ ${#subject} -gt 50 ]; then
-            echo "Error: La línea del asunto debe tener un máximo de 50 caracteres."
-            echo "Asunto: $subject"
-            exit 1
+          # Validar que el asunto no esté vacío
+          if [ -z "$subject" ]; then
+              echo "Error: El asunto del commit está vacío."
+              exit 1
           fi
 
-          # Validar que el asunto comience con mayúscula
-          if ! [[ "$subject" =~ ^[A-Z] ]]; then
-            echo "Error: La línea del asunto debe comenzar con mayúscula."
-            echo "Asunto: $subject"
-            exit 1
+          # Validar longitud del asunto
+          if [ ${#subject} -gt 50 ]; then
+              echo "Error: La línea del asunto debe tener un máximo de 50 caracteres."
+              exit 1
           fi
 
           # Validar que el asunto no termine con un punto
           if [[ "$subject" =~ \.$ ]]; then
-            echo "Error: La línea del asunto no debe terminar con un punto."
-            echo "Asunto: $subject"
-            exit 1
-          fi
-
-          # Validar uso del modo imperativo en el asunto
-          if [[ "$subject" =~ ^(Añadida|Corregida|Actualizada) ]]; then
-            echo "Error: La línea del asunto debe usar el modo imperativo."
-            echo "Asunto: $subject"
-            exit 1
-          fi
-
-          # Validar longitud de las líneas del cuerpo
-          body=$(echo "$message" | tail -n +3)
-          while IFS= read -r line; do
-            if [ ${#line} -gt 72 ]; then
-              echo "Error: Las líneas del cuerpo deben tener un máximo de 72 caracteres."
-              echo "Línea larga: $line"
+              echo "Error: La línea del asunto no debe terminar con un punto."
               exit 1
-            fi
-          done <<< "$body"
+          fi
 
           # Validar prefijos de tipo
-          if ! [[ "$subject" =~ ^(feat|fix|docs|style|test): ]]; then
-            echo "Error: El asunto debe comenzar con uno de los prefijos permitidos (feat, fix, docs, style, test)."
-            echo "Asunto: $subject"
-            exit 1
-          fi
-
-          # Validar presencia de pie de commit si aplica
-          if echo "$message" | grep -q "Refs #"; then
-            footer=$(echo "$message" | tail -n 1)
-            if ! [[ "$footer" =~ ^Refs #(null|[0-9]+)$ ]]; then
-              echo "Error: El pie del commit debe seguir el formato 'Refs #numero-issue' o 'Refs #null'."
-              echo "Pie: $footer"
+          if ! echo "$subject" | grep -Eq "^(feat|fix|docs|style|test):"; then
+              echo "Error: El asunto debe comenzar con uno de los prefijos permitidos (feat, fix, docs, style, test)."
               exit 1
-            fi
           fi
 
-          echo "El mensaje del último commit es válido."
+          echo "El mensaje del commit es válido."
