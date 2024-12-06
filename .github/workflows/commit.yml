@@ -13,9 +13,9 @@ jobs:
       - name: Check out the code
         uses: actions/checkout@v2
         with:
-          fetch-depth: 2  # Solo obtiene el último commit
+          fetch-depth: 2  # Solo obtiene los dos últimos commits
 
-    - name: Validate the penultimate commit message
+      - name: Validate the penultimate commit message
         run: |
           set -e
           # Obtener los dos últimos commits
@@ -58,7 +58,6 @@ jobs:
             echo "Asunto: $subject"
             exit 1
           fi
-
 
           # Validar longitud de las líneas del cuerpo
           body=$(echo "$message" | tail -n +3)
