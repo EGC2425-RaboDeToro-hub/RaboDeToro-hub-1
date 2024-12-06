@@ -52,11 +52,22 @@ jobs:
             exit 1
           fi
 
-          # Validar que el asunto comience con mayúscula
-          if ! [[ "$subject" =~ ^[A-Z] ]]; then
-            echo "Error: La línea del asunto debe comenzar con mayúscula."
-            echo "Asunto: $subject"
-            exit 1
+          # Validar que el asunto comience con mayúscula después del prefijo
+          if [[ "$subject" =~ ^(feat|fix|docs|style|test): ]]; then
+            # Extraer el texto después del prefijo
+            actual_subject=${subject#*: }
+            if ! [[ "$actual_subject" =~ ^[A-Z] ]]; then
+              echo "Error: La línea del asunto debe comenzar con mayúscula después del prefijo."
+              echo "Asunto: $subject"
+              exit 1
+            fi
+          else
+            # Validar mayúscula si no hay prefijo
+            if ! [[ "$subject" =~ ^[A-Z] ]]; then
+              echo "Error: La línea del asunto debe comenzar con mayúscula."
+              echo "Asunto: $subject"
+              exit 1
+            fi
           fi
 
           # Validar que el asunto no termine con un punto
