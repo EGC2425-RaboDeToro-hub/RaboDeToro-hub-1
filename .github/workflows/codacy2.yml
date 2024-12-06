@@ -54,6 +54,9 @@ jobs:
         pip install pip-audit
         pip-audit || true
 
+    - name: Create required directories
+        run: mkdir -p uploads
+
     - name: Upload coverage to Codacy
       run: |
         pip install codacy-coverage
