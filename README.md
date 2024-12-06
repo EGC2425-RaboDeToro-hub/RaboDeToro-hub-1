@@ -108,3 +108,4 @@ Some of the new integrations are the "Work Items":
 ## 📖 Project Wiki
 
  - **Wiki:** [https://github.com/EGC2425-RaboDeToro-hub/RaboDeToro-hub-1/wiki](https://github.com/EGC2425-RaboDeToro-hub/RaboDeToro-hub-1/wiki)
+
