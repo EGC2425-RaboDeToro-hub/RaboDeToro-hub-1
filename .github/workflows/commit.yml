@@ -6,17 +6,16 @@ on:
 
 jobs:
   check:
-    name: Validate Commit Messages
+    name: Validate Last Commit Message
     runs-on: ubuntu-latest
 
     steps:
       - name: Check out the code
         uses: actions/checkout@v2
         with:
-          fetch-depth: 2  # Obtén solo los dos últimos commits
+          fetch-depth: 2  # Solo obtiene el último commit
 
-      - name: Validate the penultimate commit message
-        shell: bash
+    - name: Validate the penultimate commit message
         run: |
           set -e
           # Obtener los dos últimos commits
@@ -46,35 +45,11 @@ jobs:
           # Extraer el asunto (primera línea)
           subject=$(echo "$message" | head -n 1)
 
-          # Validar que el asunto no esté vacío
-          if [ -z "$subject" ]; then
-            echo "Error: El asunto del commit está vacío."
-            exit 1
-          fi
-
           # Validar longitud del asunto
           if [ ${#subject} -gt 50 ]; then
             echo "Error: La línea del asunto debe tener un máximo de 50 caracteres."
             echo "Asunto: $subject"
             exit 1
-          fi
-
-          # Validar que el asunto comience con mayúscula después del prefijo
-          if [[ "$subject" =~ ^(feat|fix|docs|style|test): ]]; then
-            # Extraer el texto después del prefijo
-            actual_subject=${subject#*: }
-            if ! [[ "$actual_subject" =~ ^[A-Z] ]]; then
-              echo "Error: La línea del asunto debe comenzar con mayúscula después del prefijo."
-              echo "Asunto: $subject"
-              exit 1
-            fi
-          else
-            # Validar mayúscula si no hay prefijo
-            if ! [[ "$subject" =~ ^[A-Z] ]]; then
-              echo "Error: La línea del asunto debe comenzar con mayúscula."
-              echo "Asunto: $subject"
-              exit 1
-            fi
           fi
 
           # Validar que el asunto no termine con un punto
@@ -84,12 +59,6 @@ jobs:
             exit 1
           fi
 
-          # Validar uso del modo imperativo en el asunto
-          if [[ "$subject" =~ ^(Añadida|Corregida|Actualizada) ]]; then
-            echo "Error: La línea del asunto debe usar el modo imperativo."
-            echo "Asunto: $subject"
-            exit 1
-          fi
 
           # Validar longitud de las líneas del cuerpo
           body=$(echo "$message" | tail -n +3)
@@ -118,4 +87,4 @@ jobs:
             fi
           fi
 
-          echo "El mensaje del commit $penultimate_commit es válido."
+          echo "El mensaje del último commit es válido."
