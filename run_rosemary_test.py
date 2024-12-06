@@ -1,17 +1,19 @@
 import subprocess
 import sys
 
-# Definir comandos como tuplas inmutables
+# Definir comandos como listas estáticas
 ALLOWED_COMMANDS = {
-    "selenium": ("rosemary", "selenium"),
-    "coverage": ("rosemary", "coverage"),
-    "locust": ("rosemary", "locust"),
+    "selenium": ["rosemary", "selenium"],
+    "coverage": ["rosemary", "coverage"],
+    "locust": ["rosemary", "locust"],
 }
+
 
 def validate_command(command):
     """Valida que el comando esté dentro de los permitidos."""
     if command not in ALLOWED_COMMANDS.values():
         raise ValueError(f"Comando no permitido: {command}")
+
 
 def run_command(command):
     """Ejecuta un comando definido de forma segura y maneja errores."""
@@ -22,7 +24,7 @@ def run_command(command):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
-            check=True,  # Lanza excepción si el comando falla
+            check=True  # Lanza excepción si el comando falla
         )
         print(result.stdout)
     except subprocess.CalledProcessError as e:
