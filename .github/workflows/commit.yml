@@ -16,6 +16,7 @@ jobs:
           fetch-depth: 2  # Obtén solo los dos últimos commits
 
       - name: Validate the penultimate commit message
+        shell: bash
         run: |
           set -e
           # Obtener los dos últimos commits
@@ -44,6 +45,12 @@ jobs:
 
           # Extraer el asunto (primera línea)
           subject=$(echo "$message" | head -n 1)
+
+          # Validar que el asunto no esté vacío
+          if [ -z "$subject" ]; then
+            echo "Error: El asunto del commit está vacío."
+            exit 1
+          fi
 
           # Validar longitud del asunto
           if [ ${#subject} -gt 50 ]; then
