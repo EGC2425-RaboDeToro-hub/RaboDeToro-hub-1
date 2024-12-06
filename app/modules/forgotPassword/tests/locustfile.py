@@ -1,9 +1,9 @@
 from locust import HttpUser, TaskSet, task
 from core.environment.host import get_host_for_locust_testing
 from itsdangerous import URLSafeTimedSerializer
-from flask import current_app
 import os
 import secrets
+
 SECRET_KEY = os.getenv('SECRET_KEY', secrets.token_bytes())
 
 
@@ -11,16 +11,15 @@ def extract_token_from_email(response):
     """
     Extraer el token del correo electrónico.
     """
-    token = None
     response_text = response.text
-    if not "Follow this link to reset your password" in response_text:
-        token=response_text.split("=")[1]
-    print(token)
+    if "Follow this link to reset your password" in response_text:
+        return response_text.split("=")[1]
+    return None  # Retornar explícitamente None si no se encuentra el token
 
 
 class ForgotPasswordBehavior(TaskSet):
     """
-    Comportamiento de prueba existente para cargar la página de subida de datasets.
+    Comportamiento de prueba para cargar la página de recuperación de contraseña.
     """
     def on_start(self):
         self.index()
@@ -43,7 +42,7 @@ class ResetPasswordBehavior(TaskSet):
             print("Login failed!")
         else:
             print("Login success!")
-        token = extract_token_from_email(response)  # Esta función la debes definir según tu lógica
+        token = extract_token_from_email(response)  # Extraer el token del correo
 
         if not token:
             print("No token received!")
@@ -62,16 +61,17 @@ class ResetPasswordBehavior(TaskSet):
         """
         Prueba de reseteo de contraseña.
         """
-        token = create_token("user@example.com")
-        new_password = {"password": "NewPassword123!"}
+        token = extract_token_from_email(self.client.get("/email_mock"))
+        if token:
+            new_password = {"password": "NewPassword123!"}
 
-        # Simular la solicitud POST para cambiar la contraseña
-        with self.client.post(f"/forgotPassword/password/{token}", data=new_password, catch_response=True) as response:
-            if response.status_code == 200 and "Password successfully changed!" in response.text:
-                response.success()
-                print("Reset password success!")
-            else:
-                response.failure(f"Reset password failed: {response.status_code}")
+            # Simular la solicitud POST para cambiar la contraseña
+            with self.client.post(f"/forgotPassword/password/{token}", data=new_password, catch_response=True) as response:
+                if response.status_code == 200 and "Password successfully changed!" in response.text:
+                    response.success()
+                    print("Reset password success!")
+                else:
+                    response.failure(f"Reset password failed: {response.status_code}")
 
     def on_stop(self):
         """
@@ -81,7 +81,7 @@ class ResetPasswordBehavior(TaskSet):
 
 
 class PasswordUser(HttpUser):
-    tasks = [ForgotPasswordBehavior, ResetPasswordBehavior] 
+    tasks = [ForgotPasswordBehavior, ResetPasswordBehavior]
     min_wait = 5000
     max_wait = 9000
     host = get_host_for_locust_testing()

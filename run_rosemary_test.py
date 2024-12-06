@@ -11,7 +11,7 @@ ALLOWED_COMMANDS = {
 
 def validate_command(command):
     """Valida que el comando esté dentro de los permitidos."""
-    if command not in ALLOWED_COMMANDS.values():
+    if not any(command == allowed for allowed in ALLOWED_COMMANDS.values()):
         raise ValueError(f"Comando no permitido: {command}")
 
 
