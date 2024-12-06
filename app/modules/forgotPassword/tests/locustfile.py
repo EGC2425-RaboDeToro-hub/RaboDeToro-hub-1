@@ -11,8 +11,11 @@ def extract_token_from_email(response):
     """
     Extraer el token del correo electrónico.
     """
+    token = None
     response_text = response.text
-    print(response_text)
+    if not "Follow this link to reset your password" in response_text:
+        token=response_text.split("=")[1]
+    print(token)
 
 
 class ForgotPasswordBehavior(TaskSet):
