@@ -11,14 +11,16 @@ ALLOWED_COMMANDS = {
 
 def validate_command(command):
     """Valida que el comando esté dentro de los permitidos."""
-    if not any(command == allowed for allowed in ALLOWED_COMMANDS.values()):
+    if not isinstance(command, list) or len(command) == 0:
+        raise ValueError("El comando debe ser una lista no vacía.")
+    if command not in ALLOWED_COMMANDS.values():
         raise ValueError(f"Comando no permitido: {command}")
 
 
 def run_command(command):
     """Ejecuta un comando definido de forma segura y maneja errores."""
-    validate_command(command)  # Validar el comando
     try:
+        validate_command(command)  # Validar el comando
         result = subprocess.run(
             command,
             stdout=subprocess.PIPE,
@@ -27,6 +29,9 @@ def run_command(command):
             check=True  # Lanza excepción si el comando falla
         )
         print(result.stdout)
+    except ValueError as ve:
+        print(f"Error de validación: {ve}")
+        sys.exit(1)
     except subprocess.CalledProcessError as e:
         print(f"Error ejecutando {command[0]}: {e.stderr.strip()}")
         sys.exit(e.returncode)
@@ -55,10 +60,14 @@ def run_rosemary_locust():
 
 def main():
     print("Iniciando pruebas automatizadas con Rosemary...")
-    run_rosemary_selenium()
-    run_rosemary_coverage()
-    run_rosemary_locust()
-    print("Todas las pruebas se ejecutaron con éxito.")
+    try:
+        run_rosemary_selenium()
+        run_rosemary_coverage()
+        run_rosemary_locust()
+        print("Todas las pruebas se ejecutaron con éxito.")
+    except Exception as e:
+        print(f"Error durante la ejecución de pruebas: {e}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
