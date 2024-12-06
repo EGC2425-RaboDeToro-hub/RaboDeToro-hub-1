@@ -18,11 +18,11 @@ class ForgotpasswordService(BaseService):
 
     def getSerializer(self):
         return URLSafeTimedSerializer(current_app.config["SECRET_KEY"])
-  
+
     def is_valid_email(self, email):
         # Expresión regular simple para validar el correo electrónico
         return re.match(r"[^@]+@[^@]+\.[^@]+", email) is not None
-    
+
     def sendEmail(self, email: str) -> str:
         print("Iniciando función sendEmail...")  # Print de inicio
 
@@ -74,7 +74,7 @@ class ForgotpasswordService(BaseService):
 
         print("Función sendEmail completada.")
         return token
-    
+
     def addToken(self, token: str):
         if token is not None:
             reset_token = Token(token=token)

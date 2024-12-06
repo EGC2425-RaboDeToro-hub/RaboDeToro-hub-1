@@ -1,18 +1,18 @@
-from sqlalchemy import any_, or_
+from sqlalchemy import or_
 import unidecode
 from app.modules.dataset.models import Author, DSMetaData, DataSet, PublicationType, DSMetrics
 from app.modules.featuremodel.models import FMMetaData, FeatureModel
 from core.repositories.BaseRepository import BaseRepository
 import re
-from datetime import datetime
+
 
 class ExploreRepository(BaseRepository):
     def __init__(self):
         super().__init__(DataSet)
 
     def filter(
-        self, query="", sorting="newest", publication_type="any", tags=[], 
-        after_date=None, before_date=None, min_size=None, max_size=None, 
+        self, query="", sorting="newest", publication_type="any", tags=[],
+        after_date=None, before_date=None, min_size=None, max_size=None,
         min_features=None, max_features=None, min_products=None, max_products=None, **kwargs
     ):
         normalized_query = unidecode.unidecode(query).lower()
@@ -49,11 +49,9 @@ class ExploreRepository(BaseRepository):
                 if member.value.lower() == publication_type:
                     matching_type = member
                     break
-                
+
                 if matching_type is not None:
                     datasets = datasets.filter(DSMetaData.publication_type == matching_type.name)
-
-
         # Apply tags filter if specified
         if tags:
             datasets = datasets.filter(or_(*[DSMetaData.tags.ilike(f"%{tag}%") for tag in tags]))
@@ -75,7 +73,7 @@ class ExploreRepository(BaseRepository):
             datasets = datasets.filter(DataSet.created_at >= after_date)
         elif before_date:
             datasets = datasets.filter(DataSet.created_at <= before_date)
-            
+
         # Filtro de tamaño
         if min_size is not None or max_size is not None:
             if min_size is not None:

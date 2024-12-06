@@ -26,7 +26,7 @@ def show_signup_form():
         try:
             user = authentication_service.create_with_profile(**form.data)
         except Exception as exc:
-            return render_template("auth/signup_form.html", form=form, 
+            return render_template("auth/signup_form.html", form=form,
                                    error=f'Error creating user: {exc}')
 
         # Log user
@@ -44,8 +44,7 @@ def login():
     form = LoginForm()
     if request.method == 'POST' and form.validate_on_submit():
         if authentication_service.login(form.email.data, form.password.data):
-
-# Al acertar la contraseña, se añade el valor None a los intentos fallidos
+            # Al acertar la contraseña, se añade el valor None a los intentos fallidos
             session.pop('failed_attempts', None)
             return redirect(url_for('public.index'))
 # Al fallar, se añade +1 al valor de los intentos fallidos
@@ -54,7 +53,7 @@ def login():
         return render_template("auth/login_form.html", form=form,
                                error='Invalid credentials', show_forgot_password=show_forgot_password)
 
-    return render_template('auth/login_form.html', form=form,show_forgot_password=False)
+    return render_template('auth/login_form.html', form=form, show_forgot_password=False)
 
 
 @auth_bp.route('/logout')

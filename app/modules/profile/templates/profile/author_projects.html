@@ -25,7 +25,7 @@
                                 <tr>
                                     <!-- Título del Dataset -->
                                     <td>
-                                        <a href="{{ url_for('profile.dataset_detail', dataset_id=dataset.id) }}">
+                                        <a href="/doi/{{ dataset.ds_meta_data.dataset_doi }}/">
                                             {{ dataset.ds_meta_data.title }}
                                         </a>
                                     </td>

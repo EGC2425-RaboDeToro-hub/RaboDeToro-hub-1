@@ -56,3 +56,97 @@ def test_zip_all_datasets_error(dataset_service):
         # Llama al método del servicio y verifica que se maneje la excepción
         with pytest.raises(Exception):
             dataset_service.zip_all_datasets()
+
+
+# Test 3: Filtrar por características mínimas
+def test_filter_min_features(dataset_service):
+    with patch.object(dataset_service.repository, 'filter_datasets') as mock_filter:
+        mock_filter.return_value = [
+            {"id": 2, "features": 20, "products": 15},
+            {"id": 3, "features": 30, "products": 25}
+        ]
+
+        result = dataset_service.filter_datasets(min_features=15)
+        assert len(result) == 2
+        assert set(d["id"] for d in result) == {2, 3}
+        mock_filter.assert_called_once_with(min_features=15, max_features=None, min_products=None, max_products=None)
+
+
+# Test 4: Filtrar por características máximas
+def test_filter_max_features(dataset_service):
+    with patch.object(dataset_service.repository, 'filter_datasets') as mock_filter:
+        mock_filter.return_value = [
+            {"id": 1, "features": 10, "products": 5},
+            {"id": 4, "features": 5, "products": 3}
+        ]
+
+        result = dataset_service.filter_datasets(max_features=10)
+        assert len(result) == 2
+        assert set(d["id"] for d in result) == {1, 4}
+        mock_filter.assert_called_once_with(min_features=None, max_features=10, min_products=None, max_products=None)
+
+
+# Test 5: Filtrar por productos mínimos
+def test_filter_min_products(dataset_service):
+    with patch.object(dataset_service.repository, 'filter_datasets') as mock_filter:
+        mock_filter.return_value = [
+            {"id": 2, "features": 20, "products": 15},
+            {"id": 3, "features": 30, "products": 25}
+        ]
+
+        result = dataset_service.filter_datasets(min_products=10)
+        assert len(result) == 2
+        assert set(d["id"] for d in result) == {2, 3}
+        mock_filter.assert_called_once_with(min_features=None, max_features=None, min_products=10, max_products=None)
+
+
+# Test 6: Filtrar por productos máximos
+def test_filter_max_products(dataset_service):
+    with patch.object(dataset_service.repository, 'filter_datasets') as mock_filter:
+        mock_filter.return_value = [
+            {"id": 1, "features": 10, "products": 5},
+            {"id": 4, "features": 5, "products": 3}
+        ]
+
+        result = dataset_service.filter_datasets(max_products=5)
+        assert len(result) == 2
+        assert set(d["id"] for d in result) == {1, 4}
+        mock_filter.assert_called_once_with(min_features=None, max_features=None, min_products=None, max_products=5)
+
+
+# Test 7: Combinar filtros
+def test_combined_filters(dataset_service):
+    with patch.object(dataset_service.repository, 'filter_datasets') as mock_filter:
+        mock_filter.return_value = [
+            {"id": 1, "features": 10, "products": 5}
+        ]
+
+        result = dataset_service.filter_datasets(min_features=10, max_features=20, min_products=5, max_products=10)
+        assert len(result) == 1
+        assert result[0]["id"] == 1
+        mock_filter.assert_called_once_with(min_features=10, max_features=20, min_products=5, max_products=10)
+
+
+# Test 8: Sin filtros aplicados (devuelve todos los datasets)
+def test_no_filters(dataset_service):
+    with patch.object(dataset_service.repository, 'filter_datasets') as mock_filter:
+        mock_filter.return_value = [
+            {"id": 1, "features": 10, "products": 5},
+            {"id": 2, "features": 20, "products": 15},
+            {"id": 3, "features": 30, "products": 25},
+            {"id": 4, "features": 5, "products": 3}
+        ]
+
+        result = dataset_service.filter_datasets()
+        assert len(result) == 4
+        mock_filter.assert_called_once_with(min_features=None, max_features=None, min_products=None, max_products=None)
+
+
+# Test 9: Filtros que no devuelven resultados
+def test_no_results(dataset_service):
+    with patch.object(dataset_service.repository, 'filter_datasets') as mock_filter:
+        mock_filter.return_value = []
+
+        result = dataset_service.filter_datasets(min_features=50, max_products=1)
+        assert len(result) == 0
+        mock_filter.assert_called_once_with(min_features=50, max_features=None, min_products=None, max_products=1)

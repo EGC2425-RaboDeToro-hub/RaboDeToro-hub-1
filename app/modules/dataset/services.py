@@ -10,6 +10,7 @@ from flask import request
 from zipfile import ZipFile
 
 from app.modules.auth.services import AuthenticationService
+from app.modules.dataset.models import DSMetrics
 from app.modules.dataset.models import DSViewRecord, DataSet, DSMetaData
 from app.modules.dataset.repositories import (
     AuthorRepository,
@@ -37,11 +38,12 @@ def calculate_checksum_and_size(file_path):
         hash_md5 = hashlib.md5(content).hexdigest()
         return hash_md5, file_size
 
+
 def count_features_and_products(uvl_content):
     import re
     # Contar características
     feature_count = len(re.findall(r'^\s*[^#\s]', uvl_content, re.MULTILINE))
-    
+
     # Calcular número de productos posibles (simplificado)
     alternatives = re.findall(r'alternative\s+{([^}]+)}', uvl_content)
     ors = re.findall(r'or\s+{([^}]+)}', uvl_content)
@@ -112,7 +114,15 @@ class DataSetService(BaseService):
 
     def total_dataset_views(self) -> int:
         return self.dsviewrecord_repostory.total_dataset_views()
-    
+
+    def filter_datasets(self, min_features=None, max_features=None, min_products=None, max_products=None):
+        return self.repository.filter_datasets(
+            min_features=min_features,
+            max_features=max_features,
+            min_products=min_products,
+            max_products=max_products
+        )
+
     def create_from_form(self, form, current_user) -> DataSet:
         # Definir el autor principal
         main_author = {
