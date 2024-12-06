@@ -6,30 +6,35 @@ on:
 
 jobs:
   check:
-    name: Validate Last Commit Message
+    name: Validate Commit Messages
     runs-on: ubuntu-latest
 
     steps:
       - name: Check out the code
         uses: actions/checkout@v2
         with:
-          fetch-depth: 1  # Solo obtiene el último commit
+          fetch-depth: 2  # Obtén solo los dos últimos commits
 
-      - name: Validate last commit message
+      - name: Validate the penultimate commit message
         run: |
           set -e
-          # Extraer el mensaje del último commit
-          message=$(git log -1 --pretty=%B)
+          # Obtener los dos últimos commits
+          commits=$(git log -2 --pretty=format:"%H")
 
-          # Depuración: Mostrar el mensaje extraído
-          echo "Mensaje de commit extraído:"
+          # Separar los commits en variables (último y penúltimo)
+          commit_array=($commits)
+          last_commit=${commit_array[0]}
+          penultimate_commit=${commit_array[1]}
+
+          echo "Último commit: $last_commit"
+          echo "Penúltimo commit: $penultimate_commit"
+
+          # Validar solo el penúltimo commit (omitimos el último porque es el merge)
+          message=$(git log -1 --pretty=%B $penultimate_commit)
+
+          echo "Validando commit: $penultimate_commit"
+          echo "Mensaje del commit:"
           echo "$message"
-
-          # Omitir merge commits
-          if [[ "$message" =~ ^Merge ]]; then
-            echo "Este es un merge commit. No se requiere validación."
-            exit 0
-          fi
 
           # Validar separación entre asunto y cuerpo
           if ! echo "$message" | grep -Pzo "(?s)^[^\n]+\n\n[^\n]+"; then
@@ -95,4 +100,4 @@ jobs:
             fi
           fi
 
-          echo "El mensaje del último commit es válido."
+          echo "El mensaje del commit $penultimate_commit es válido."
