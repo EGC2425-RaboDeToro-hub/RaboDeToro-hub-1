@@ -59,6 +59,8 @@ Algunas de las nuevas integraciones son los "Work Items":
 
 - **Gestion de logs y sesiones flask:** Para evitar la inclusion en el codigo de logs indeseados se ha modificado el codigo para que estos sean eliminados cada vez que se arranca el proyecto, ademas de excluirlos del repositorio, lo mismo se ha realizado con las sesiones flask
 
+- **Arreglo de lint:** Se han arreglado todos los errores de lint que aparecian al usar flake8
+
 ## 🌐 Enlace de despliegue del proyecto:
 - **Render:**  [ https://rabodetoro-hub-1.onrender.com](https://rabodetoro-hub-1.onrender.com)
 
@@ -110,6 +112,8 @@ Some of the new integrations are the "Work Items":
 - **Build Script:** From now on, you can prepare the entire project environment with a single command: ./setup.sh. This script will handle everything you would have done by following the installation manual.
 
 - **Log and Flask Session Management:** To avoid the inclusion of unwanted logs in the code, the code has been modified to delete them every time the project starts, and they have been excluded from the repository. The same has been done with Flask sessions.
+
+- **Lint Fixes:** All lint errors that appeared when using flake8 have been fixed.
 
 ## 🌐 Project Deployment Link:
 - **Render:**  [ https://rabodetoro-hub-1.onrender.com](https://rabodetoro-hub-1.onrender.com)
