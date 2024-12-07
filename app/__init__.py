@@ -24,6 +24,15 @@ email_service = EmailService()
 session = Session()
 
 
+def clear_logs_and_sessions():
+    if os.path.exists("logs"):
+        for file in os.listdir("logs"):
+            os.remove(os.path.join("logs", file))
+    if os.path.exists("flask_session"):
+        for file in os.listdir("flask_session"):
+            os.remove(os.path.join("flask_session", file))
+
+
 def create_app(config_name="development"):
     app = Flask(__name__)
 
@@ -41,6 +50,9 @@ def create_app(config_name="development"):
     # Initialize session with the app
     session.init_app(app)
 
+    # Deletes all logs and flask_session files
+    clear_logs_and_sessions()
+    
     # Register modules
     module_manager = ModuleManager(app)
     module_manager.register_modules()
