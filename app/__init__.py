@@ -1,4 +1,5 @@
 import os
+import shutil
 
 from flask import Flask
 
@@ -24,8 +25,41 @@ email_service = EmailService()
 session = Session()
 
 
+def clear_logs_and_sessions():
+    # Eliminar archivos y enlaces simbólicos en la carpeta logs
+    logs_path = "logs"
+    if os.path.exists(logs_path):
+        for file in os.listdir(logs_path):
+            file_path = os.path.join(logs_path, file)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+                print(f"Deleted log file: {file_path}")
+            except Exception as e:
+                print(f"Failed to delete {file_path}. Reason: {e}")
+
+    # Eliminar archivos y enlaces simbólicos en la carpeta flask_session
+    session_path = "flask_session"
+    if os.path.exists(session_path):
+        for file in os.listdir(session_path):
+            file_path = os.path.join(session_path, file)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+                print(f"Deleted session file: {file_path}")
+            except Exception as e:
+                print(f"Failed to delete {file_path}. Reason: {e}")
+
+
 def create_app(config_name="development"):
     app = Flask(__name__)
+
+    # Llama a la función para limpiar logs y sesiones antes de iniciar la aplicación
+    clear_logs_and_sessions()
 
     # Load configuration according to environment
     config_manager = ConfigManager(app)
@@ -40,6 +74,9 @@ def create_app(config_name="development"):
 
     # Initialize session with the app
     session.init_app(app)
+
+    # Deletes all logs and flask_session files
+    clear_logs_and_sessions()
 
     # Register modules
     module_manager = ModuleManager(app)
