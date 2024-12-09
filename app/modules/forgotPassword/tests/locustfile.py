@@ -1,6 +1,5 @@
 from locust import HttpUser, TaskSet, task
 from core.environment.host import get_host_for_locust_testing
-from itsdangerous import URLSafeTimedSerializer
 import os
 import secrets
 
@@ -66,7 +65,8 @@ class ResetPasswordBehavior(TaskSet):
             new_password = {"password": "NewPassword123!"}
 
             # Simular la solicitud POST para cambiar la contraseña
-            with self.client.post(f"/forgotPassword/password/{token}", data=new_password, catch_response=True) as response:
+            with self.client.post(f"/forgotPassword/password/{token}",
+                                  data=new_password, catch_response=True)as response:
                 if response.status_code == 200 and "Password successfully changed!" in response.text:
                     response.success()
                     print("Reset password success!")

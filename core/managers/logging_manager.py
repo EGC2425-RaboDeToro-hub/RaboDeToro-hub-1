@@ -7,11 +7,15 @@ class LoggingManager:
         self.app = app
 
     def setup_logging(self):
+        # Revisa que exista la carpeta logs, si no existe la crea
+        import os
+        if not os.path.exists('logs'):
+            os.mkdir('logs')
         # Configure log format
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
         # Configure the log file with file rotation
-        file_handler = RotatingFileHandler('app.log', maxBytes=10240, backupCount=10)
+        file_handler = RotatingFileHandler('logs/app.log', maxBytes=10240, backupCount=10)
         file_handler.setLevel(logging.ERROR)
         file_handler.setFormatter(formatter)
 
