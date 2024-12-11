@@ -7,7 +7,7 @@ on:
 
 jobs:
   lint-and-tests:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     services:
       mysql:
         image: mysql:5.7
@@ -22,13 +22,7 @@ jobs:
           --health-cmd="mysqladmin ping --silent --wait=30"
           --health-interval=10s
           --health-timeout=5s
-          --health-retries=5
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-        python-version: ['3.11', '3.12']
-      fail-fast: false
-
+          --health-retries=5 # Corrección del error
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -36,7 +30,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: '3.12'
 
     - name: Install dependencies
       run: |
@@ -44,7 +38,7 @@ jobs:
         pip install -r requirements.txt
 
     - name: Wait for MySQL to be ready
-      run: sleep 15 # Opcional: Aumenta este tiempo si MySQL tarda más en estar listo
+      run: sleep 15
 
     - name: Verify MySQL status
       run: mysqladmin -h 127.0.0.1 -P 3306 -u uvlhub_user -puvlhub_password ping
@@ -52,7 +46,7 @@ jobs:
     - name: Run Static Analysis with flake8
       run: |
         pip install flake8
-        flake8 app/ --count --statistics --format=html --output-file=flake8-report-${{ matrix.os }}.html
+        flake8 app/ --count --statistics --format=html --output-file=flake8-report.html
 
     - name: Run Tests and Generate Coverage Report
       run: |
@@ -73,9 +67,9 @@ jobs:
     - name: Upload Coverage and Flake8 Reports as Artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: reports-${{ matrix.os }}
+        name: reports
         path: |
-          flake8-report-${{ matrix.os }}.html
+          flake8-report.html
           htmlcov/
 
   pr-validation:
