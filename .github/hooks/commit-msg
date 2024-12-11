@@ -18,3 +18,4 @@ if ! echo "$commit_message" | grep -qE "$commit_regex"; then
   echo "feat(auth): agregar login de usuario (ticket: 123)"
   exit 1
 fi
+

@@ -21,3 +21,4 @@ RaboDeToroHub1venv/
 google-chrome-stable_current_amd64.deb 
 .vscode/
 core/selenium/common.py 
+flask_session*
