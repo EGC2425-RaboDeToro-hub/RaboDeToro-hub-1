@@ -36,6 +36,9 @@ jobs:
     - name: Wait for MySQL to be ready
       run: sleep 15
 
+    - name: Create required directories
+      run: mkdir -p uploads
+
     - name: Verify MySQL status
       run: mysqladmin -h 127.0.0.1 -P 3306 -u uvlhub_user -puvlhub_password ping
 
