@@ -17,9 +17,22 @@
         state: started
         enabled: yes
 
+    - name: Create .my.cnf for root
+      copy:
+        dest: /root/.my.cnf
+        content: |
+          [client]
+          user=root
+          password={{ mariadb_root_password }}
+        owner: root
+        mode: '0600'
+
     - name: Create SQL script
       copy:
         content: |
+          DROP DATABASE IF EXISTS {{ mariadb_database }};
+          DROP DATABASE IF EXISTS {{ mariadb_test_database }};
+          DROP USER IF EXISTS '{{ mariadb_user }}';
           CREATE DATABASE IF NOT EXISTS {{ mariadb_database }};
           CREATE DATABASE IF NOT EXISTS {{ mariadb_test_database }};
           CREATE USER IF NOT EXISTS '{{ mariadb_user }}'@'localhost' IDENTIFIED BY '{{ mariadb_password }}';
