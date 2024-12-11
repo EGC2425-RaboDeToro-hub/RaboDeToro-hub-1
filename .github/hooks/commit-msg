@@ -1,0 +1,20 @@
+#!/bin/sh
+
+# Aquí va la expresión regular personalizada según el formato que estás usando
+# Este es un ejemplo de formato donde "ticket" es opcional
+commit_regex="^([a-z0-9]+)(\([a-z0-9\-]+\))?: .{5,}(\s\([A-Za-z0-9]+\))?$"
+
+# Leer el mensaje del commit (el archivo contiene el mensaje)
+commit_message=$(cat "$1")
+
+# Si el mensaje no coincide con el patrón, rechaza el commit
+if ! echo "$commit_message" | grep -qE "$commit_regex"; then
+  echo "ERROR: El mensaje del commit no sigue el formato esperado."
+  echo ""
+  echo "Formato esperado:"
+  echo "tipo[área opcional]: descripción (ticket: ID)"
+  echo ""
+  echo "Ejemplo:"
+  echo "feat(auth): agregar login de usuario (ticket: 123)"
+  exit 1
+fi
