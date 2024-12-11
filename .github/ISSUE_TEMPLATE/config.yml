@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+issue_templates:
+  - name: "Tarea Técnica"
+    description: "Crea una issue para una tarea técnica específica."
+    file: issue_technical_task_template.yml
+  - name: "Work Item Template"
+    description: "Crea un Work Item (WI) siguiendo la política de issues."
+    file: issue_work_item_template.yml
