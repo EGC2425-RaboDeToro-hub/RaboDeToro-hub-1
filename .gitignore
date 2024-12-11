@@ -20,5 +20,6 @@ test_file.txt
 RaboDeToroHub1venv/
 google-chrome-stable_current_amd64.deb 
 .vscode/
+logs/
 core/selenium/common.py 
-flask_session*
+flask_session/*
