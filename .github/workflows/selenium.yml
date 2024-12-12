@@ -55,8 +55,20 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Wait for MySQL to be ready
+        run: |
+          for i in {1..30}; do
+            if mysqladmin ping -h 127.0.0.1 --silent; then
+              echo "MySQL is ready."
+              break
+            fi
+            echo "Waiting for MySQL to be ready..."
+            sleep 2
+          done
+
       - name: Apply database migrations
-        run: flask db upgrade
+        run: |
+          flask db upgrade || (echo "Database migration failed"; exit 1)
         env:
           FLASK_APP: app
           FLASK_ENV: testing
