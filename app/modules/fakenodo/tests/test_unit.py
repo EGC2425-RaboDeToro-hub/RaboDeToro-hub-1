@@ -32,6 +32,9 @@ def fakenodo_service():
 def test_test_connection(fakenodo_service):
     assert fakenodo_service.test_connection() is True
 
+def test_generate_doi(fakenodo_service):
+    doi = fakenodo_service._generate_doi(123)
+    assert doi == "10.1234/dataset123"
 
 def test_create_new_deposition(fakenodo_service, mock_dataset):
     mock_deposition = MagicMock()
