@@ -75,6 +75,12 @@ jobs:
             sleep 5
           done
 
+      - name: Debug Flask Application
+        run: |
+          curl -s http://localhost:5000
+          curl -s http://localhost:5000 > debug_output.html
+        
+
       - name: Wait for a specific element in Selenium
         run: |
           python - <<EOF
@@ -96,7 +102,7 @@ jobs:
 
           try:
               driver.get("http://localhost:5000")
-              WebDriverWait(driver, 20).until(
+              WebDriverWait(driver, 30).until(
                   EC.presence_of_element_located((By.XPATH, "//h1[contains(@class, 'h2 mb-3') and contains(., 'Latest datasets')]"))
               )
               print("Elemento encontrado en Selenium.")
