@@ -3,6 +3,8 @@ name: Commit Syntax Validation
 on:
   pull_request:
     branches: [main, develop]
+  push:
+    branches: [main, develop]
 
 jobs:
   check:
@@ -13,7 +15,7 @@ jobs:
       - name: Check out the code
         uses: actions/checkout@v2
         with:
-          fetch-depth: 2  # Solo obtiene los dos últimos commits
+          fetch-depth: 2  
 
       - name: Validate the penultimate commit message
         run: |
@@ -27,47 +29,65 @@ jobs:
           last_commit=${commit_array[0]}
           penultimate_commit=${commit_array[1]}
 
-          echo "Último commit: $last_commit"
-          echo "Penúltimo commit: $penultimate_commit"
+          validate_commit() {
+              local commit_hash=$1
+              local message=$(git log -1 --pretty=%B "$commit_hash")
 
-          # Validar solo el penúltimo commit
-          message=$(git log -1 --pretty=%B $penultimate_commit)
+              echo "Validando commit: $commit_hash"
+              echo "Mensaje del commit:"
+              echo "$message"
 
-          echo "Validando commit: $penultimate_commit"
-          echo "Mensaje del commit:"
-          echo "$message"
+              # Validar separación entre asunto y cuerpo
+              if ! echo "$message" | grep -Pzo "(?s)^[^\n]+\n\n[^\n]+"; then
+                  echo "Error: El mensaje de commit debe separar el asunto y el cuerpo con una línea en blanco."
+                  exit 1
+              fi
 
-          # Validar separación entre asunto y cuerpo
-          if ! echo "$message" | grep -Pzo "(?s)^[^\n]+\n\n[^\n]+"; then
-            echo "Error: El mensaje de commit debe separar el asunto y el cuerpo con una línea en blanco."
-            exit 1
-          fi
+              # Extraer el asunto (primera línea)
+              subject=$(echo "$message" | head -n 1)
 
-          # Extraer el asunto (primera línea)
-          subject=$(echo "$message" | head -n 1)
+              # Validar que el asunto no esté vacío
+              if [ -z "$subject" ]; then
+                  echo "Error: El asunto del commit está vacío."
+                  exit 1
+              fi
 
-          # Validar que el asunto no esté vacío
-          if [ -z "$subject" ]; then
-              echo "Error: El asunto del commit está vacío."
-              exit 1
-          fi
+              # Validar longitud del asunto
+              if [ ${#subject} -gt 50 ]; then
+                  echo "Error: La línea del asunto debe tener un máximo de 50 caracteres."
+                  exit 1
+              fi
 
-          # Validar longitud del asunto
-          if [ ${#subject} -gt 50 ]; then
-              echo "Error: La línea del asunto debe tener un máximo de 50 caracteres."
-              exit 1
-          fi
+              # Validar que el asunto no termine con un punto
+              if [[ "$subject" =~ \.$ ]]; then
+                  echo "Error: La línea del asunto no debe terminar con un punto."
+                  exit 1
+              fi
 
-          # Validar que el asunto no termine con un punto
-          if [[ "$subject" =~ \.$ ]]; then
-              echo "Error: La línea del asunto no debe terminar con un punto."
-              exit 1
-          fi
+              # Validar commits de merge
+              if [[ "$subject" =~ ^[Mm]erge ]]; then
+                  echo "El commit es un merge. Verificando el mensaje adicional..."
+                  additional_message=$(echo "$message" | sed -n '2p')
 
-          # Validar prefijos de tipo
-          if ! echo "$subject" | grep -Eq "^(feat|fix|docs|style|test):"; then
-              echo "Error: El asunto debe comenzar con uno de los prefijos permitidos (feat, fix, docs, style, test)."
-              exit 1
-          fi
+                  # Validar que la segunda línea siga el formato Conventional Commits
+                  if ! [[ "$additional_message" =~ ^(feat|fix|docs|style|test): ]]; then
+                      echo "Error: El mensaje adicional del commit de merge no sigue el formato esperado."
+                      exit 1
+                  fi
+              else
+                  # Validar prefijos para commits normales
+                  if ! echo "$subject" | grep -Eq "^(feat|fix|docs|style|test):"; then
+                      echo "Error: El asunto debe comenzar con uno de los prefijos permitidos (feat, fix, docs, style, test)."
+                      exit 1
+                  fi
+              fi
 
-          echo "El mensaje del commit es válido."
+              echo "El mensaje del commit es válido."
+              return 0
+          }
+
+          # Validar el último commit
+          validate_commit "$last_commit"
+
+          # Validar el penúltimo commit (si es necesario)
+          validate_commit "$penultimate_commit"
