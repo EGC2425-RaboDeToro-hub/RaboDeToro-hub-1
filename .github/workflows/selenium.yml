@@ -49,15 +49,26 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Wait for Selenium and MySQL to be ready
+      - name: Start Flask Application
+        run: |
+          FLASK_ENV=testing flask run --host=0.0.0.0 --port=5000 &
+        env:
+          FLASK_APP: app
+          FLASK_ENV: testing
+          MARIADB_HOSTNAME: 127.0.0.1
+          MARIADB_PORT: 3306
+          MARIADB_TEST_DATABASE: uvlhubdb_test
+          MARIADB_USER: uvlhub_user
+          MARIADB_PASSWORD: uvlhub_password
+
+      - name: Wait for Flask to be ready
         run: |
           for i in {1..10}; do
-            if curl -s http://localhost:4444/wd/hub/status | grep '"ready":true' && \
-               mysqladmin -h 127.0.0.1 -u uvlhub_user -puvlhub_password ping; then
-              echo "Selenium and MySQL are ready."
+            if curl -s http://localhost:5000 | grep -q "expected_keyword_or_response"; then
+              echo "Flask application is ready."
               break
             fi
-            echo "Waiting for services to be ready..."
+            echo "Waiting for Flask to be ready..."
             sleep 5
           done
 
@@ -65,11 +76,5 @@ jobs:
         env:
           SELENIUM_HOST: localhost
           SELENIUM_PORT: 4444
-          FLASK_ENV: testing
-          MARIADB_HOSTNAME: 127.0.0.1
-          MARIADB_PORT: 3306
-          MARIADB_TEST_DATABASE: uvlhubdb_test
-          MARIADB_USER: uvlhub_user
-          MARIADB_PASSWORD: uvlhub_password
         run: |
-          pytest app/modules/ --maxfail=3 --disable-warnings --ignore-glob='*unit*' --ignore-glob='*integration*'
+          pytest app/modules/ --maxfail=3 --disable-warnings
