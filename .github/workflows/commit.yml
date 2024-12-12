@@ -15,7 +15,7 @@ jobs:
       - name: Check out the code
         uses: actions/checkout@v2
         with:
-          fetch-depth: 10  # Obtener hasta los últimos 10 commits para validaciones
+          fetch-depth: 10  
 
       - name: Validate Commit Messages
         run: |
