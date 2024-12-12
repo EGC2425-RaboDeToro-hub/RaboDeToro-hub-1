@@ -88,8 +88,6 @@ pip install -r requirements.txt
 pip install -e ./
 
 # Iniciar la aplicacion
-rosemary db:reset -y
-rosemary db:migrate
 rosemary db:seed
 flask db upgrade
 flask run --host=0.0.0.0 --port=5000
