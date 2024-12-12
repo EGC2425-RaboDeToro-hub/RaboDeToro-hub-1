@@ -12,7 +12,7 @@
 # 🔗 Rabo De toro- Spanish
 ## 💡Sobre Nosotros
 
-Aplicación de modelos formato UVL integrada con fakenodo y flamapy siguiendo los Principios de Ciencia Abierta, que permite a los usuarios acceder a conjuntos de datos publicos con buscadores de alta calidad y con comunidades para poder buscar los datos del tipo que mas le interesen - Desarrollado por EGC2425-RaboDeToro-Hub-1.
+Aplicación de modelos formato UVL integrada con fakenodo y flamapy siguiendo los Principios de Ciencia Abierta, que permite a los usuarios acceder a conjuntos de datos publicos con buscadores de alta calidad y con comunidades para poder buscar los datos del tipo que mas le interesen<br> - Desarrollado por EGC2425-RaboDeToro-Hub-1.
 
 ## 👥 Miembros del proyecto
 
