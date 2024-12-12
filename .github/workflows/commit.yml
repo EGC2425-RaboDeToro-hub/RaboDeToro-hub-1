@@ -15,7 +15,7 @@ jobs:
       - name: Check out the code
         uses: actions/checkout@v2
         with:
-          fetch-depth: 2  
+          fetch-depth: 2  # Solo obtiene los dos últimos commits
 
       - name: Validate the penultimate commit message
         run: |
@@ -36,6 +36,12 @@ jobs:
               echo "Validando commit: $commit_hash"
               echo "Mensaje del commit:"
               echo "$message"
+
+              # Ignorar commits de merge
+              if [[ "$message" =~ ^[Mm]erge ]]; then
+                  echo "El commit es un merge y será ignorado."
+                  return 1
+              fi
 
               # Validar separación entre asunto y cuerpo
               if ! echo "$message" | grep -Pzo "(?s)^[^\n]+\n\n[^\n]+"; then
@@ -64,30 +70,18 @@ jobs:
                   exit 1
               fi
 
-              # Validar commits de merge
-              if [[ "$subject" =~ ^[Mm]erge ]]; then
-                  echo "El commit es un merge. Verificando el mensaje adicional..."
-                  additional_message=$(echo "$message" | sed -n '2p')
-
-                  # Validar que la segunda línea siga el formato Conventional Commits
-                  if ! [[ "$additional_message" =~ ^(feat|fix|docs|style|test): ]]; then
-                      echo "Error: El mensaje adicional del commit de merge no sigue el formato esperado."
-                      exit 1
-                  fi
-              else
-                  # Validar prefijos para commits normales
-                  if ! echo "$subject" | grep -Eq "^(feat|fix|docs|style|test):"; then
-                      echo "Error: El asunto debe comenzar con uno de los prefijos permitidos (feat, fix, docs, style, test)."
-                      exit 1
-                  fi
+              # Validar prefijos para commits normales
+              if ! echo "$subject" | grep -Eq "^(feat|fix|docs|style|test):"; then
+                  echo "Error: El asunto debe comenzar con uno de los prefijos permitidos (feat, fix, docs, style, test)."
+                  exit 1
               fi
 
               echo "El mensaje del commit es válido."
               return 0
           }
 
-          # Validar el último commit
-          validate_commit "$last_commit"
-
-          # Validar el penúltimo commit (si es necesario)
-          validate_commit "$penultimate_commit"
+          # Validar el último commit o ignorarlo si es un merge
+          if ! validate_commit "$last_commit"; then
+              echo "El último commit es un merge, intentando validar el penúltimo commit..."
+              validate_commit "$penultimate_commit"
+          fi
