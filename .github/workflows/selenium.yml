@@ -23,6 +23,17 @@ jobs:
         options: >-
           --shm-size=2048m
 
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: uvlhub_root_password
+          MYSQL_DATABASE: uvlhubdb_test
+          MYSQL_USER: uvlhub_user
+          MYSQL_PASSWORD: uvlhub_password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
       - name: Check out code
@@ -38,14 +49,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Wait for Selenium to be ready
+      - name: Wait for Selenium and MySQL to be ready
         run: |
           for i in {1..10}; do
-            if curl -s http://localhost:4444/wd/hub/status | grep '"ready":true'; then
-              echo "Selenium is ready."
+            if curl -s http://localhost:4444/wd/hub/status | grep '"ready":true' && \
+               mysqladmin -h 127.0.0.1 -u uvlhub_user -puvlhub_password ping; then
+              echo "Selenium and MySQL are ready."
               break
             fi
-            echo "Waiting for Selenium to be ready..."
+            echo "Waiting for services to be ready..."
             sleep 5
           done
 
@@ -53,5 +65,11 @@ jobs:
         env:
           SELENIUM_HOST: localhost
           SELENIUM_PORT: 4444
+          FLASK_ENV: testing
+          MARIADB_HOSTNAME: 127.0.0.1
+          MARIADB_PORT: 3306
+          MARIADB_TEST_DATABASE: uvlhubdb_test
+          MARIADB_USER: uvlhub_user
+          MARIADB_PASSWORD: uvlhub_password
         run: |
-          pytest tests/selenium --maxfail=3 --disable-warnings
+          pytest app/modules/ --maxfail=3 --disable-warnings --ignore-glob='*unit*' --ignore-glob='*integration*'
