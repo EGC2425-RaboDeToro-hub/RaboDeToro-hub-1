@@ -30,12 +30,17 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
 
-      - name: Install dependencies for Chrome
+      - name: Install dependencies for Chrome and Xvfb
         run: |
           sudo apt-get update
-          sudo apt-get install -y wget gnupg unzip
+          sudo apt-get install -y wget gnupg unzip xvfb
           wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
           sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
+
+      - name: Start Xvfb
+        run: |
+          Xvfb :99 -screen 0 1920x1080x24 &
+          export DISPLAY=:99
 
       - name: Check Chrome Installation
         run: google-chrome --version
@@ -77,4 +82,7 @@ jobs:
         run: curl -s http://localhost:5000 > page_output.html
 
       - name: Run Selenium Tests
-        run: rosemary selenium
+        run: |
+          DISPLAY=:99 rosemary selenium
+        env:
+          DISPLAY: :99  # Requiere Xvfb para el entorno gráfico

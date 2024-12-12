@@ -12,6 +12,7 @@ def initialize_driver():
     options.add_argument("--disable-dev-shm-usage")  # Usa /tmp en lugar de /dev/shm
     options.add_argument("--disable-gpu")  # Desactiva el uso de la GPU
     options.add_argument("--window-size=1920,1080")  # Tamaño de ventana para evitar problemas de visualización
+    options.add_argument("--disable-extensions")  # Desactiva extensiones para mejorar rendimiento
     driver = webdriver.Chrome(service=service, options=options)
     return driver
 
