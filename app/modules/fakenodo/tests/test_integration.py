@@ -1,6 +1,5 @@
 from datetime import datetime
 import pytest
-from flask import url_for
 from app import db
 from app.modules.dataset.models import DataSet, DSMetaData, PublicationType
 from app.modules.fakenodo.models import Fakenodo
@@ -23,14 +22,16 @@ def test_client(test_client):
         db.session.add(profile)
         db.session.commit()
 
-        ds_meta_data = DSMetaData(title = "Test metadata", description="Test metadata", publication_type= PublicationType.NONE)
+        ds_meta_data = DSMetaData(title="Test metadata", description="Test metadata",
+                                  publication_type=PublicationType.NONE)
         db.session.add(ds_meta_data)
         db.session.commit()
 
-        dataset = DataSet(user_id=user_test.id, ds_meta_data_id=ds_meta_data.id, size_in_kb=1024.0, created_at=datetime.utcnow())
+        dataset = DataSet(user_id=user_test.id, ds_meta_data_id=ds_meta_data.id,
+                          size_in_kb=1024.0, created_at=datetime.utcnow())
         db.session.add(dataset)
         db.session.commit()
-        
+
         dep1 = Fakenodo(doi="10.1234/fake1", dep_metadata={"key": "value1"})
         dep2 = Fakenodo(doi="10.1234/fake2", dep_metadata={"key": "value2"})
         db.session.add(dep1)
@@ -39,6 +40,7 @@ def test_client(test_client):
         db.session.commit()
 
     yield test_client
+
 
 def test_test_connection_fakenodo(test_client):
     login(test_client, 'user@example.com', 'test1234')
