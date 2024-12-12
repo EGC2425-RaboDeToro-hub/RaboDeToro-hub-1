@@ -15,19 +15,15 @@ jobs:
       - name: Check out the code
         uses: actions/checkout@v2
         with:
-          fetch-depth: 2  # Solo obtiene los dos últimos commits
+          fetch-depth: 10  # Obtener hasta los últimos 10 commits para validaciones
 
-      - name: Validate the penultimate commit message
+      - name: Validate Commit Messages
         run: |
           #!/bin/bash
           set -e
-          # Obtener los dos últimos commits
-          commits=$(git log -2 --pretty=format:"%H")
-
-          # Separar los commits en variables
-          commit_array=($commits)
-          last_commit=${commit_array[0]}
-          penultimate_commit=${commit_array[1]}
+          # Obtener los últimos 10 commits
+          MAX_COMMITS=10
+          commits=$(git log -${MAX_COMMITS} --pretty=format:"%H")
 
           validate_commit() {
               local commit_hash=$1
@@ -80,8 +76,15 @@ jobs:
               return 0
           }
 
-          # Validar el último commit o ignorarlo si es un merge
-          if ! validate_commit "$last_commit"; then
-              echo "El último commit es un merge, intentando validar el penúltimo commit..."
-              validate_commit "$penultimate_commit"
-          fi
+          # Iterar sobre los commits y buscar uno válido
+          for commit_hash in $commits; do
+              if validate_commit "$commit_hash"; then
+                  echo "Se encontró y validó un commit válido: $commit_hash"
+                  exit 0
+              fi
+              echo "Intentando con el siguiente commit..."
+          done
+
+          # Si no se encuentra un commit válido
+          echo "Error: No se encontró ningún commit válido en los últimos $MAX_COMMITS commits."
+          exit 1
