@@ -109,11 +109,10 @@ class FakenodoService(BaseService):
             raise Exception(f"Failed to publish deposition with error: {str(error)}")
 
     def get_deposition(self, dep_id: str):
-
-        if dep_id not in self.depositions:
+        deposition = self.deposition_repository.get_by_id(dep_id)
+        if not deposition:
             raise Exception("Deposition not found.")
-
-        return self.depositions[dep_id]
+        return deposition
 
     def get_doi(self, dep_id: str) -> str:
         """
@@ -133,11 +132,9 @@ class FakenodoService(BaseService):
             deposition_metadata["doi"] = generated_doi
         return deposition_metadata["doi"]
 
-    def get_all_depositions(self) -> dict:
-        """
-        Get all depositions from Fakenodo.
-        """
-        return self.depositions
+    def get_all_depositions(self):
+        depositions = self.deposition_repository.get_all()
+        return depositions
 
     def delete_deposition(self, dep_id: str) -> dict:
         """
@@ -147,6 +144,6 @@ class FakenodoService(BaseService):
             raise Exception("Deposition not found.")
 
         # Simulate deletion
-        del self.depositions[dep_id]
+        self.deposition_repository.delete(dep_id)
 
         return {"message": "Deposition deleted successfully."}
