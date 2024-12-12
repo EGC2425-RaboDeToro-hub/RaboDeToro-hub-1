@@ -9,7 +9,11 @@ from flask_login import login_required
 @fakenodo_bp.route("/fakenodo/api/test_connection", methods=["GET"])
 @login_required
 def test_connection_fakenodo():
-    response = {"status": "success", "message": "Connected to FakenodoAPI"}
+    service = FakenodoService()
+    if service.test_connection():
+        response = {"status": "success", "message": "Connected to FakenodoAPI"}
+    else:
+        response = {"status": "error", "message": "Connection failed"}
     return jsonify(response)
 
 
