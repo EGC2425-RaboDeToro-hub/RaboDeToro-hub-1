@@ -2,6 +2,7 @@ import pytest
 from unittest.mock import MagicMock
 from app.modules.fakenodo.services import FakenodoService
 
+
 @pytest.fixture
 def mock_dataset():
     mock_ds = MagicMock()
@@ -37,12 +38,12 @@ def test_create_new_deposition(fakenodo_service, mock_dataset):
     mock_deposition.id = 123
     mock_deposition.doi = "10.1234/dataset123"
     mock_deposition.metadata = {
-    "title": "Test Dataset",
-    "description": "Test description",
-    "creators": [],
-    "keywords": ["tag1", "tag2", "uvlhub"],
-    "license": "CC-BY-4.0"
-    }
+        "title": "Test Dataset",
+        "description": "Test description",
+        "creators": [],
+        "keywords": ["tag1", "tag2", "uvlhub"],
+        "license": "CC-BY-4.0"
+        }
     fakenodo_service.deposition_repository.create_new_deposition.return_value = mock_deposition
     deposition = fakenodo_service.create_new_deposition(mock_dataset)
 
@@ -56,6 +57,7 @@ def test_upload_file(fakenodo_service, mock_dataset, mock_feature_model):
     fakenodo_service.upload_file = MagicMock(return_value={"status": "success"})
     response = fakenodo_service.upload_file(mock_dataset, "123", mock_feature_model)
     assert response["status"] == "success"
+
 
 def test_publish_deposition(fakenodo_service):
     fakenodo_service.publish_deposition = MagicMock(return_value={"status": "published"})

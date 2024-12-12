@@ -1,7 +1,6 @@
 from app.modules.fakenodo.repositories import FakenodoRepository
 from core.services.BaseService import BaseService
 from app.modules.dataset.models import DataSet
-from app.modules.fakenodo.models import Fakenodo
 from app.modules.featuremodel.models import FeatureModel
 import logging
 import os
