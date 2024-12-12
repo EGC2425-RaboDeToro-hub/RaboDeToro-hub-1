@@ -66,6 +66,10 @@ jobs:
             sleep 2
           done
 
+      - name: Verify MySQL user permissions
+        run: |
+          echo "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = 'uvlhubdb_test';" | mysql -h 127.0.0.1 -u uvlhub_user -puvlhub_password
+
       - name: Apply database migrations
         run: |
           flask db upgrade || (echo "Database migration failed"; exit 1)
