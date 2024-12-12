@@ -1,14 +1,14 @@
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.common.exceptions import NoSuchElementException
-import time
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
 
 from core.environment.host import get_host_for_selenium_testing
 from core.selenium.common import initialize_driver, close_driver
 
 
 def test_login_and_check_element():
-
     driver = initialize_driver()
 
     try:
@@ -17,32 +17,28 @@ def test_login_and_check_element():
         # Open the login page
         driver.get(f'{host}/login')
 
-        # Wait a little while to make sure the page has loaded completely
-        time.sleep(4)
+        # Wait for the email and password fields to be present
+        wait = WebDriverWait(driver, 10)  # Wait up to 10 seconds
+        email_field = wait.until(EC.presence_of_element_located((By.NAME, 'email')))
+        password_field = wait.until(EC.presence_of_element_located((By.NAME, 'password')))
 
-        # Find the username and password field and enter the values
-        email_field = driver.find_element(By.NAME, 'email')
-        password_field = driver.find_element(By.NAME, 'password')
-
+        # Enter values
         email_field.send_keys('user1@example.com')
         password_field.send_keys('1234')
 
-        # Send the form
+        # Submit the form
         password_field.send_keys(Keys.RETURN)
 
-        # Wait a little while to ensure that the action has been completed
-        time.sleep(4)
-
+        # Wait for the element to appear on the next page
         try:
-
-            driver.find_element(By.XPATH, "//h1[contains(@class, 'h2 mb-3') and contains(., 'Latest datasets')]")
+            wait.until(EC.presence_of_element_located(
+                (By.XPATH, "//h1[contains(@class, 'h2 mb-3') and contains(., 'Latest datasets')]")
+            ))
             print('Test passed!')
-
-        except NoSuchElementException:
-            raise AssertionError('Test failed!')
+        except TimeoutException:
+            raise AssertionError('Test failed! Element not found within the timeout period.')
 
     finally:
-
         # Close the browser
         close_driver(driver)
 
