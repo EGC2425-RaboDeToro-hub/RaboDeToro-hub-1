@@ -53,13 +53,13 @@ def my_profile():
         total_datasets=total_datasets_count
     )
 
+
 @profile_bp.route('/author/<int:author_id>/projects', methods=['GET'])
 def proyectos_autor(author_id):
     author = Author.query.get(author_id)
     if not author:
         return "Autor no encontrado", 404
-    
+
     datasets = DataSet.query.join(DSMetaData).filter(DSMetaData.authors.any(id=author_id)).all()
 
     return render_template('profile/author_projects.html', author=author, datasets=datasets)
-
