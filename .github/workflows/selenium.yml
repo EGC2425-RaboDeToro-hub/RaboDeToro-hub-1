@@ -21,23 +21,19 @@ jobs:
         ports:
           - 4444:4444
         options: >-
-          --shm-size=2048m
-
-      mysql:
-        image: mysql:5.7
-        env:
-          MYSQL_ROOT_PASSWORD: uvlhub_root_password
-          MYSQL_DATABASE: uvlhubdb_test
-          MYSQL_USER: uvlhub_user
-          MYSQL_PASSWORD: uvlhub_password
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+          --shm-size=2g
 
     steps:
       - name: Check out code
         uses: actions/checkout@v4
+
+      - name: Install dependencies for Chrome
+        run: sudo apt-get update && sudo apt-get install -y wget gnupg unzip
+
+      - name: Install Google Chrome
+        run: |
+          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
 
       - name: Set up Python
         uses: actions/setup-python@v5
