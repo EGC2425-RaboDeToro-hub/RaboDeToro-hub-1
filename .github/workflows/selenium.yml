@@ -36,12 +36,10 @@ jobs:
           sudo apt-get install -y wget gnupg unzip xvfb
           wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
           sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
-
       - name: Start Xvfb
         run: |
           Xvfb :99 -screen 0 1920x1080x24 &
           export DISPLAY=:99
-
       - name: Check Chrome Installation
         run: google-chrome --version
 
@@ -54,7 +52,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-
       - name: Wait for MySQL to be ready
         run: |
           for i in {1..30}; do
@@ -65,12 +62,10 @@ jobs:
             echo "Waiting for MySQL to be ready..."
             sleep 2
           done
-
       - name: Create database and ensure permissions
         run: |
           mysql -h 127.0.0.1 -u root -p"${{ secrets.MYSQL_ROOT_PASSWORD }}" -e "CREATE DATABASE IF NOT EXISTS uvlhubdb_test;"
           mysql -h 127.0.0.1 -u root -p"${{ secrets.MYSQL_ROOT_PASSWORD }}" -e "GRANT ALL PRIVILEGES ON uvlhubdb_test.* TO 'uvlhub_user'@'%'; FLUSH PRIVILEGES;"
-
       - name: Apply database migrations
         run: |
           flask db upgrade || (echo "Database migration failed"; exit 1)
@@ -105,7 +100,6 @@ jobs:
             echo "Waiting for Flask to be ready..."
             sleep 5
           done
-
       - name: Debug Flask Application
         run: curl -s http://localhost:5000 > flask_debug_page.html
 
