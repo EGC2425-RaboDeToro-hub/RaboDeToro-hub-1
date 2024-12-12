@@ -66,9 +66,10 @@ jobs:
             sleep 2
           done
 
-      - name: Verify MySQL user permissions
+      - name: Create database and ensure permissions
         run: |
-          echo "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = 'uvlhubdb_test';" | mysql -h 127.0.0.1 -u uvlhub_user -puvlhub_password
+          mysql -h 127.0.0.1 -u root -p"${{ secrets.MYSQL_ROOT_PASSWORD }}" -e "CREATE DATABASE IF NOT EXISTS uvlhubdb_test;"
+          mysql -h 127.0.0.1 -u root -p"${{ secrets.MYSQL_ROOT_PASSWORD }}" -e "GRANT ALL PRIVILEGES ON uvlhubdb_test.* TO 'uvlhub_user'@'%'; FLUSH PRIVILEGES;"
 
       - name: Apply database migrations
         run: |
@@ -112,4 +113,4 @@ jobs:
         run: |
           DISPLAY=:99 rosemary selenium
         env:
-          DISPLAY: :99  # Requiere Xvfb para el entorno gráfico
+          DISPLAY: :99
