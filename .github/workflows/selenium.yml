@@ -55,6 +55,17 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Apply database migrations
+        run: flask db upgrade
+        env:
+          FLASK_APP: app
+          FLASK_ENV: testing
+          MARIADB_HOSTNAME: 127.0.0.1
+          MARIADB_PORT: 3306
+          MARIADB_TEST_DATABASE: uvlhubdb_test
+          MARIADB_USER: uvlhub_user
+          MARIADB_PASSWORD: uvlhub_password
+
       - name: Start Flask Application
         run: |
           FLASK_ENV=testing flask run --host=0.0.0.0 --port=5000 &
@@ -69,7 +80,7 @@ jobs:
 
       - name: Wait for Flask to be ready
         run: |
-          for i in {1..20}; do
+          for i in {1..30}; do
             if curl -s http://localhost:5000 | grep -q "expected_keyword_or_response"; then
               echo "Flask application is ready."
               break
@@ -79,7 +90,7 @@ jobs:
           done
 
       - name: Debug Flask Application
-        run: curl -s http://localhost:5000 > page_output.html
+        run: curl -s http://localhost:5000 > flask_debug_page.html
 
       - name: Run Selenium Tests
         run: |
