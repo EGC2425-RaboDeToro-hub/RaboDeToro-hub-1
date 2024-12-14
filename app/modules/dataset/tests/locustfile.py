@@ -7,6 +7,7 @@ class DatasetBehavior(TaskSet):
     """
     Comportamiento de prueba existente para cargar la página de subida de datasets.
     """
+
     def on_start(self):
         self.dataset()
 
@@ -20,9 +21,12 @@ class AdditionalDatasetBehavior(TaskSet):
     """
     Nuevas pruebas para descargar todos los datasets, login y logout.
     """
+
     def on_start(self):
         # Login al inicio de las pruebas
-        response = self.client.post("/login", data={"email": "user@example.com", "password": "test1234"})
+        response = self.client.post(
+            "/login", data={"email": "user@example.com", "password": "test1234"}
+        )
         if response.status_code != 200:
             response.failure("Login failed!")
 
@@ -43,12 +47,14 @@ class AdditionalDatasetBehavior(TaskSet):
         """
         self.client.get("/logout")
 
+
 class DatasetUser(HttpUser):
     """
     Usuario Locust que ejecuta las tareas de las clases DatasetBehavior, AdditionalDatasetBehavior y
     DatasetFilterBehavior.
     """
-    tasks = [DatasetBehavior, AdditionalDatasetBehavior, DatasetFilterBehavior]
+
+    tasks = [DatasetBehavior, AdditionalDatasetBehavior]
     min_wait = 5000
     max_wait = 9000
     host = get_host_for_locust_testing()

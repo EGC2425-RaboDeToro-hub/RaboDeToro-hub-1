@@ -6,30 +6,34 @@ from app.modules.explore.forms import ExploreForm
 from app.modules.explore.services import ExploreService
 
 
-@explore_bp.route('/explore', methods=['GET', 'POST'])
+@explore_bp.route("/explore", methods=["GET", "POST"])
 def index():
-    if request.method == 'GET':
-        query = request.args.get('query', '')
-        after_date = request.args.get('after_date')
-        before_date = request.args.get('before_date')
-        sorting = request.args.get('sorting', 'newest')
-        publication_type = request.args.get('publication_type', 'any')
-        tags = request.args.getlist('tags')
-        number_of_features=request.args.get('number_of_features')
-        number_of_models=request.args.get('number_of_models')
+    if request.method == "GET":
+        query = request.args.get("query", "")
+        after_date = request.args.get("after_date")
+        before_date = request.args.get("before_date")
+        sorting = request.args.get("sorting", "newest")
+        publication_type = request.args.get("publication_type", "any")
+        tags = request.args.getlist("tags")
+        number_of_features = request.args.get("number_of_features")
+        number_of_models = request.args.get("number_of_models")
 
         # Convertir las fechas a datetime si están presentes y ajustar la hora
         if after_date:
             try:
-                after_date = datetime.strptime(after_date, '%Y-%m-%d')
-                after_date = after_date.replace(hour=0, minute=0, second=0)  # Ajustar a 00:00
+                after_date = datetime.strptime(after_date, "%Y-%m-%d")
+                after_date = after_date.replace(
+                    hour=0, minute=0, second=0
+                )  # Ajustar a 00:00
                 print("Adjusted after_date:", after_date)  # Depuración
             except ValueError:
                 after_date = None
         if before_date:
             try:
-                before_date = datetime.strptime(before_date, '%Y-%m-%d')
-                before_date = before_date.replace(hour=23, minute=59, second=59)  # Ajustar a 23:59
+                before_date = datetime.strptime(before_date, "%Y-%m-%d")
+                before_date = before_date.replace(
+                    hour=23, minute=59, second=59
+                )  # Ajustar a 23:59
                 print("Adjusted before_date:", before_date)  # Depuración
             except ValueError:
                 before_date = None
@@ -43,27 +47,28 @@ def index():
                 after_date=after_date,
                 before_date=before_date,
                 number_of_features=number_of_features,
-                number_of_models=number_of_models
+                number_of_models=number_of_models,
             )
         except Exception as e:
             print(f"Error while filtering datasets: {e}")
             datasets = []
 
-
         form = ExploreForm()
-        return render_template('explore/index.html', form=form, query=query, datasets=datasets)
+        return render_template(
+            "explore/index.html", form=form, query=query, datasets=datasets
+        )
 
-    if request.method == 'POST':
+    if request.method == "POST":
         criteria = request.get_json()
 
         # Extrae after_date y before_date desde el JSON recibido
-        after_date = criteria.get('after_date')
-        before_date = criteria.get('before_date')
+        after_date = criteria.get("after_date")
+        before_date = criteria.get("before_date")
 
         # Verificar y convertir las fechas
         if after_date:
             try:
-                after_date = datetime.strptime(after_date, '%Y-%m-%d')
+                after_date = datetime.strptime(after_date, "%Y-%m-%d")
                 after_date = after_date.replace(hour=0, minute=0, second=0)
                 print(f"after_date: {after_date}")  # Depuración
             except ValueError:
@@ -72,7 +77,7 @@ def index():
 
         if before_date:
             try:
-                before_date = datetime.strptime(before_date, '%Y-%m-%d')
+                before_date = datetime.strptime(before_date, "%Y-%m-%d")
                 before_date = before_date.replace(hour=23, minute=59, second=59)
                 print(f"before_date: {before_date}")  # Depuración
             except ValueError:
@@ -80,8 +85,8 @@ def index():
                 before_date = None
 
         # Actualizar criteria con los valores procesados
-        criteria['after_date'] = after_date
-        criteria['before_date'] = before_date
+        criteria["after_date"] = after_date
+        criteria["before_date"] = before_date
 
         # Llama al servicio de filtrado con los criterios
         datasets = ExploreService().filter(**criteria)

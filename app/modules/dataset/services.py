@@ -10,7 +10,6 @@ from flask import request
 from zipfile import ZipFile
 
 from app.modules.auth.services import AuthenticationService
-from app.modules.dataset.models import DSMetrics
 from app.modules.dataset.models import DSViewRecord, DataSet, DSMetaData
 from app.modules.dataset.repositories import (
     AuthorRepository,
