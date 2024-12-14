@@ -82,29 +82,20 @@
                         </label>
                     </div>
 
-                    <!-- Filtros adicionales -->
-                    <div class="row mt-3">
-                        <div class="col-md-6">
-                            <label for="min_features" class="form-label">Min Features:</label>
-                            <input type="number" name="min_features" id="min_features" class="form-control" placeholder="Min">
-                        </div>
-                        <div class="col-md-6">
-                            <label for="max_features" class="form-label">Max Features:</label>
-                            <input type="number" name="max_features" id="max_features" class="form-control" placeholder="Max">
-                        </div>
+                    <!-- Filtros características y productos -->
+                    <div class="mb-3">
+                        <label class="form-label" for="number_of_features">
+                            Search for number of features
+                        </label>
+                        <input class="form-control" id="number_of_features" name="number_of_features" required="" type="number"
+                                value="" autofocus>
                     </div>
-
-                    <div class="row mt-3">
-                        <div class="col-md-6">
-                            <label for="min_products" class="form-label">Min Products:</label>
-                            <input type="number" name="min_products" id="min_products" class="form-control" placeholder="Min">
-                        </div>
-                        <div class="col-md-6">
-                            <label for="max_products" class="form-label">Max Products:</label>
-                            <input type="number" name="max_products" id="max_products" class="form-control" placeholder="Max">
-                        </div>
-                    </div>                  
-                    
+                    <div class="mb-3">
+                        <label class="form-label" for="number_of_models">
+                            Search for number of models
+                        </label>
+                        <input class="form-control" id="number_of_models" name="number_of_models" required="" type="number" value="" autofocus>
+                    </div>
                     <!-- Campos de filtro de fecha -->
                     <div class="row mt-3">
                         <div class="col-lg-6">
