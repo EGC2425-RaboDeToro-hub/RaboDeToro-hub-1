@@ -27,6 +27,8 @@ from app.modules.hubfile.repositories import (
     HubfileViewRecordRepository
 )
 from core.services.BaseService import BaseService
+from flamapy.metamodels.fm_metamodel.transformations import UVLReader, GlencoeWriter, SPLOTWriter
+from flamapy.metamodels.pysat_metamodel.transformations import FmToPysat, DimacsWriter
 
 logger = logging.getLogger(__name__)
 
@@ -230,14 +232,16 @@ class DataSetService(BaseService):
                     )
 
         return temp_dir
-
+    
     def zip_all_datasets(self) -> str:
+        """
+        Genera un archivo ZIP con todos los datasets sincronizados, incluyendo los formatos exportados.
+        """
         temp_dir = tempfile.mkdtemp()
         zip_path = os.path.join(temp_dir, "all_datasets.zip")
         try:
             with ZipFile(zip_path, "w") as zipf:
                 logger.info("Iniciando la creación del archivo ZIP de todos los datasets sincronizados.")
-                found_files = False  # Variable para verificar si se encuentran archivos
 
                 for user_dir in os.listdir("uploads"):
                     user_path = os.path.join("uploads", user_dir)
@@ -247,26 +251,65 @@ class DataSetService(BaseService):
                             if os.path.isdir(dataset_path) and dataset_dir.startswith("dataset_"):
                                 dataset_id = int(dataset_dir.split("_")[1])
                                 if self.is_synchronized(dataset_id):
-                                    logger.info(f"Dataset sincronizado encontrado: {dataset_id} en {dataset_path}")
-                                    # Añadir todos los archivos y subdirectorios del dataset al ZIP
-                                    for subdir, dirs, files in os.walk(dataset_path):
+                                    for subdir, _, files in os.walk(dataset_path):
                                         for file in files:
-                                            full_path = os.path.join(subdir, file)
-                                            # Mantener la estructura de directorios en el ZIP
-                                            relative_path = os.path.relpath(full_path, user_path)
-                                            zipf.write(
-                                                full_path,
-                                                arcname=os.path.join(user_dir, relative_path),
-                                            )
-                                            found_files = True  # Se encontró al menos un archivo
-                if not found_files:
-                    logger.warning("No se encontraron archivos en los datasets sincronizados para añadir al ZIP.")
-                if not os.path.exists(zip_path):
-                    raise FileNotFoundError("El archivo ZIP no fue creado correctamente.")
+                                            if file.endswith(".uvl"):
+                                                full_path = os.path.join(subdir, file)
+
+                                                # Añadir archivo UVL original
+                                                zipf.write(full_path, arcname=f"{user_dir}/{dataset_dir}/{file}")
+
+                                                # Generar y añadir exportaciones
+                                                for format in ["glencoe", "dimacs", "splot"]:
+                                                    try:
+                                                        converted_content = self.convert_to_format(full_path, format)
+                                                        if converted_content:
+                                                            converted_file_name = file.replace(".uvl", f".{format}.txt")
+                                                            arcname = f"{user_dir}/{dataset_dir}/{converted_file_name}"
+                                                            zipf.writestr(arcname, converted_content)
+                                                    except Exception as e:
+                                                        logger.error(f"Error al convertir {file} a {format}: {e}")
         except Exception as e:
-            logger.error(f"Error al crear el archivo ZIP de todos los datasets: {e}")
+            logger.error(f"Error al crear el archivo ZIP: {e}")
             raise e
         return zip_path
+
+    def convert_to_format(self, file_path: str, format: str) -> Optional[str]:
+        try:
+            # Diccionario con las clases de conversión
+            writer_classes = {
+                "glencoe": GlencoeWriter,
+                "dimacs": DimacsWriter,
+                "splot": SPLOTWriter
+            }
+
+            if format == "uvl":
+                with open(file_path, "r") as uvl_file:
+                    return uvl_file.read()
+
+            if format not in writer_classes:
+                logger.error(f"Formato desconocido: {format}")
+                return None
+
+            temp_file = tempfile.NamedTemporaryFile(delete=False)
+            try:
+                fm = UVLReader(file_path).transform()
+                if format == "dimacs":
+                    sat = FmToPysat(fm).transform()
+                    writer_classes[format](temp_file.name, sat).transform()
+                else:
+                    writer_classes[format](temp_file.name, fm).transform()
+
+                # Leer y devolver el contenido convertido
+                with open(temp_file.name, "r") as converted_file:
+                    return converted_file.read()
+            finally:
+                # Limpiar el archivo temporal
+                os.remove(temp_file.name)
+
+        except Exception as e:
+            logger.error(f"Error al convertir el archivo {file_path} a {format}: {e}")
+            return None
 
 
 class AuthorService(BaseService):
