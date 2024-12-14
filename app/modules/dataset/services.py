@@ -18,16 +18,23 @@ from app.modules.dataset.repositories import (
     DSDownloadRecordRepository,
     DSMetaDataRepository,
     DSViewRecordRepository,
-    DataSetRepository
+    DataSetRepository,
 )
-from app.modules.featuremodel.repositories import FMMetaDataRepository, FeatureModelRepository
+from app.modules.featuremodel.repositories import (
+    FMMetaDataRepository,
+    FeatureModelRepository,
+)
 from app.modules.hubfile.repositories import (
     HubfileDownloadRecordRepository,
     HubfileRepository,
-    HubfileViewRecordRepository
+    HubfileViewRecordRepository,
 )
 from core.services.BaseService import BaseService
-from flamapy.metamodels.fm_metamodel.transformations import UVLReader, GlencoeWriter, SPLOTWriter
+from flamapy.metamodels.fm_metamodel.transformations import (
+    UVLReader,
+    GlencoeWriter,
+    SPLOTWriter,
+)
 from flamapy.metamodels.pysat_metamodel.transformations import FmToPysat, DimacsWriter
 
 logger = logging.getLogger(__name__)
@@ -43,12 +50,13 @@ def calculate_checksum_and_size(file_path):
 
 def count_features_and_products(uvl_content):
     import re
+
     # Contar características
-    feature_count = len(re.findall(r'^\s*[^#\s]', uvl_content, re.MULTILINE))
+    feature_count = len(re.findall(r"^\s*[^#\s]", uvl_content, re.MULTILINE))
 
     # Calcular número de productos posibles (simplificado)
-    alternatives = re.findall(r'alternative\s+{([^}]+)}', uvl_content)
-    ors = re.findall(r'or\s+{([^}]+)}', uvl_content)
+    alternatives = re.findall(r"alternative\s+{([^}]+)}", uvl_content)
+    ors = re.findall(r"or\s+{([^}]+)}", uvl_content)
     product_count = 1
     for option_group in alternatives + ors:
         options = option_group.splitlines()
@@ -76,7 +84,9 @@ class DataSetService(BaseService):
         source_dir = current_user.temp_folder()
 
         working_dir = os.getenv("WORKING_DIR", "")
-        dest_dir = os.path.join(working_dir, "uploads", f"user_{current_user.id}", f"dataset_{dataset.id}")
+        dest_dir = os.path.join(
+            working_dir, "uploads", f"user_{current_user.id}", f"dataset_{dataset.id}"
+        )
 
         os.makedirs(dest_dir, exist_ok=True)
 
@@ -93,7 +103,9 @@ class DataSetService(BaseService):
     def get_unsynchronized(self, current_user_id: int) -> DataSet:
         return self.repository.get_unsynchronized(current_user_id)
 
-    def get_unsynchronized_dataset(self, current_user_id: int, dataset_id: int) -> DataSet:
+    def get_unsynchronized_dataset(
+        self, current_user_id: int, dataset_id: int
+    ) -> DataSet:
         return self.repository.get_unsynchronized_dataset(current_user_id, dataset_id)
 
     def latest_synchronized(self):
@@ -117,12 +129,14 @@ class DataSetService(BaseService):
     def total_dataset_views(self) -> int:
         return self.dsviewrecord_repostory.total_dataset_views()
 
-    def filter_datasets(self, min_features=None, max_features=None, min_products=None, max_products=None):
+    def filter_datasets(
+        self, min_features=None, max_features=None, min_products=None, max_products=None
+    ):
         return self.repository.filter_datasets(
             min_features=min_features,
             max_features=max_features,
             min_products=min_products,
-            max_products=max_products
+            max_products=max_products,
         )
 
     def create_from_form(self, form, current_user) -> DataSet:
@@ -145,11 +159,15 @@ class DataSetService(BaseService):
 
             # Agregar autores principales y adicionales
             for author_data in [main_author] + form.get_authors():
-                author = self.author_repository.create(commit=False, ds_meta_data_id=dsmetadata.id, **author_data)
+                author = self.author_repository.create(
+                    commit=False, ds_meta_data_id=dsmetadata.id, **author_data
+                )
                 dsmetadata.authors.append(author)
 
             # Crear el dataset
-            dataset = self.create(commit=False, user_id=current_user.id, ds_meta_data_id=dsmetadata.id)
+            dataset = self.create(
+                commit=False, user_id=current_user.id, ds_meta_data_id=dsmetadata.id
+            )
 
             # Inicializar métricas agregadas
             total_feature_count = 0
@@ -160,11 +178,15 @@ class DataSetService(BaseService):
                 uvl_filename = feature_model.uvl_filename.data
 
                 # Crear FMMetaData
-                fmmetadata = self.fmmetadata_repository.create(commit=False, **feature_model.get_fmmetadata())
+                fmmetadata = self.fmmetadata_repository.create(
+                    commit=False, **feature_model.get_fmmetadata()
+                )
 
                 # Agregar autores al modelo UVL
                 for author_data in feature_model.get_authors():
-                    author = self.author_repository.create(commit=False, fm_meta_data_id=fmmetadata.id, **author_data)
+                    author = self.author_repository.create(
+                        commit=False, fm_meta_data_id=fmmetadata.id, **author_data
+                    )
                     fmmetadata.authors.append(author)
 
                 # Crear el modelo de características
@@ -177,9 +199,11 @@ class DataSetService(BaseService):
                 checksum, size = calculate_checksum_and_size(file_path)
 
                 # Contar características y productos en el archivo UVL
-                with open(file_path, 'r') as uvl_file:
+                with open(file_path, "r") as uvl_file:
                     uvl_content = uvl_file.read()
-                    feature_count, product_count = count_features_and_products(uvl_content)
+                    feature_count, product_count = count_features_and_products(
+                        uvl_content
+                    )
 
                 # Actualizar métricas agregadas
                 total_feature_count += feature_count
@@ -187,7 +211,11 @@ class DataSetService(BaseService):
 
                 # Crear el archivo relacionado con el modelo
                 file = self.hubfilerepository.create(
-                    commit=False, name=uvl_filename, checksum=checksum, size=size, feature_model_id=fm.id
+                    commit=False,
+                    name=uvl_filename,
+                    checksum=checksum,
+                    size=size,
+                    feature_model_id=fm.id,
                 )
                 fm.files.append(file)
 
@@ -208,12 +236,14 @@ class DataSetService(BaseService):
         return self.dsmetadata_repository.update(id, **kwargs)
 
     def get_uvlhub_doi(self, dataset: DataSet) -> str:
-        domain = os.getenv('DOMAIN', 'localhost')
-        return f'http://{domain}/doi/{dataset.ds_meta_data.dataset_doi}'
+        domain = os.getenv("DOMAIN", "localhost")
+        return f"http://{domain}/doi/{dataset.ds_meta_data.dataset_doi}"
 
     def zip_dataset(self, dataset: DataSet) -> str:
-        working_dir = os.getenv('WORKING_DIR', '')
-        file_path = os.path.join(working_dir, "uploads", f"user_{dataset.user_id}", f"dataset_{dataset.id}")
+        working_dir = os.getenv("WORKING_DIR", "")
+        file_path = os.path.join(
+            working_dir, "uploads", f"user_{dataset.user_id}", f"dataset_{dataset.id}"
+        )
         temp_dir = tempfile.mkdtemp()
         zip_path = os.path.join(temp_dir, f"dataset_{dataset.id}.zip")
 
@@ -232,7 +262,7 @@ class DataSetService(BaseService):
                     )
 
         return temp_dir
-    
+
     def zip_all_datasets(self) -> str:
         """
         Genera un archivo ZIP con todos los datasets sincronizados, incluyendo los formatos exportados.
@@ -241,14 +271,18 @@ class DataSetService(BaseService):
         zip_path = os.path.join(temp_dir, "all_datasets.zip")
         try:
             with ZipFile(zip_path, "w") as zipf:
-                logger.info("Iniciando la creación del archivo ZIP de todos los datasets sincronizados.")
+                logger.info(
+                    "Iniciando la creación del archivo ZIP de todos los datasets sincronizados."
+                )
 
                 for user_dir in os.listdir("uploads"):
                     user_path = os.path.join("uploads", user_dir)
                     if os.path.isdir(user_path) and user_dir.startswith("user_"):
                         for dataset_dir in os.listdir(user_path):
                             dataset_path = os.path.join(user_path, dataset_dir)
-                            if os.path.isdir(dataset_path) and dataset_dir.startswith("dataset_"):
+                            if os.path.isdir(dataset_path) and dataset_dir.startswith(
+                                "dataset_"
+                            ):
                                 dataset_id = int(dataset_dir.split("_")[1])
                                 if self.is_synchronized(dataset_id):
                                     for subdir, _, files in os.walk(dataset_path):
@@ -257,18 +291,39 @@ class DataSetService(BaseService):
                                                 full_path = os.path.join(subdir, file)
 
                                                 # Añadir archivo UVL original
-                                                zipf.write(full_path, arcname=f"{user_dir}/{dataset_dir}/{file}")
+                                                zipf.write(
+                                                    full_path,
+                                                    arcname=f"{user_dir}/{dataset_dir}/{file}",
+                                                )
 
                                                 # Generar y añadir exportaciones
-                                                for format in ["glencoe", "dimacs", "splot"]:
+                                                for format in [
+                                                    "glencoe",
+                                                    "dimacs",
+                                                    "splot",
+                                                ]:
                                                     try:
-                                                        converted_content = self.convert_to_format(full_path, format)
+                                                        converted_content = (
+                                                            self.convert_to_format(
+                                                                full_path, format
+                                                            )
+                                                        )
                                                         if converted_content:
-                                                            converted_file_name = file.replace(".uvl", f".{format}.txt")
+                                                            converted_file_name = (
+                                                                file.replace(
+                                                                    ".uvl",
+                                                                    f".{format}.txt",
+                                                                )
+                                                            )
                                                             arcname = f"{user_dir}/{dataset_dir}/{converted_file_name}"
-                                                            zipf.writestr(arcname, converted_content)
+                                                            zipf.writestr(
+                                                                arcname,
+                                                                converted_content,
+                                                            )
                                                     except Exception as e:
-                                                        logger.error(f"Error al convertir {file} a {format}: {e}")
+                                                        logger.error(
+                                                            f"Error al convertir {file} a {format}: {e}"
+                                                        )
         except Exception as e:
             logger.error(f"Error al crear el archivo ZIP: {e}")
             raise e
@@ -280,7 +335,7 @@ class DataSetService(BaseService):
             writer_classes = {
                 "glencoe": GlencoeWriter,
                 "dimacs": DimacsWriter,
-                "splot": SPLOTWriter
+                "splot": SPLOTWriter,
             }
 
             if format == "uvl":
@@ -340,7 +395,7 @@ class DSViewRecordService(BaseService):
     def the_record_exists(self, dataset: DataSet, user_cookie: str):
         return self.repository.the_record_exists(dataset, user_cookie)
 
-    def create_new_record(self, dataset: DataSet,  user_cookie: str) -> DSViewRecord:
+    def create_new_record(self, dataset: DataSet, user_cookie: str) -> DSViewRecord:
         return self.repository.create_new_record(dataset, user_cookie)
 
     def create_cookie(self, dataset: DataSet) -> str:
@@ -349,7 +404,9 @@ class DSViewRecordService(BaseService):
         if not user_cookie:
             user_cookie = str(uuid.uuid4())
 
-        existing_record = self.the_record_exists(dataset=dataset, user_cookie=user_cookie)
+        existing_record = self.the_record_exists(
+            dataset=dataset, user_cookie=user_cookie
+        )
 
         if not existing_record:
             self.create_new_record(dataset=dataset, user_cookie=user_cookie)
@@ -369,17 +426,17 @@ class DOIMappingService(BaseService):
             return None
 
 
-class SizeService():
+class SizeService:
 
     def __init__(self):
         pass
 
     def get_human_readable_size(self, size: int) -> str:
         if size < 1024:
-            return f'{size} bytes'
-        elif size < 1024 ** 2:
-            return f'{round(size / 1024, 2)} KB'
-        elif size < 1024 ** 3:
-            return f'{round(size / (1024 ** 2), 2)} MB'
+            return f"{size} bytes"
+        elif size < 1024**2:
+            return f"{round(size / 1024, 2)} KB"
+        elif size < 1024**3:
+            return f"{round(size / (1024 ** 2), 2)} MB"
         else:
-            return f'{round(size / (1024 ** 3), 2)} GB'
+            return f"{round(size / (1024 ** 3), 2)} GB"
