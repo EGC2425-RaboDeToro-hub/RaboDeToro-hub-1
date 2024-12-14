@@ -48,3 +48,75 @@ class TestPruebaFiltros:
         self.driver.find_element(By.ID, "min_size").click()
         self.driver.find_element(By.ID, "min_size").send_keys("1")
         self.driver.find_element(By.ID, "clear-filters").click()
+
+    def test_filter_by_number_of_features(self):
+        """
+        Probar el filtro por número de características.
+        """
+        self.driver.get("http://127.0.0.1:5000/")
+        self.driver.set_window_size(1854, 1048)
+
+        # Navegar a la sección "Explore"
+        element = WebDriverWait(self.driver, 10).until(
+            EC.element_to_be_clickable((By.CSS_SELECTOR, ".sidebar-item:nth-child(3) .align-middle:nth-child(2)"))
+        )
+        element.click()
+
+        # Aplicar filtro por número de características
+        self.driver.find_element(By.ID, "number_of_features").click()
+        self.driver.find_element(By.ID, "number_of_features").send_keys("33")
+        self.driver.find_element(By.ID, "clear-filters").click()
+
+    def test_filter_by_number_of_models(self):
+        """
+        Probar el filtro por número de modelos.
+        """
+        self.driver.get("http://127.0.0.1:5000/")
+        self.driver.set_window_size(1854, 1048)
+
+        # Navegar a la sección "Explore"
+        element = WebDriverWait(self.driver, 10).until(
+            EC.element_to_be_clickable((By.CSS_SELECTOR, ".sidebar-item:nth-child(3) .align-middle:nth-child(2)"))
+        )
+        element.click()
+
+        # Aplicar filtro por número de modelos
+        self.driver.find_element(By.ID, "number_of_models").click()
+        self.driver.find_element(By.ID, "number_of_models").send_keys("3")
+        self.driver.find_element(By.ID, "clear-filters").click()
+
+    def test_combined_filters(self):
+        """
+        Probar filtros combinados de características y modelos.
+        """
+        self.driver.get("http://127.0.0.1:5000/")
+        self.driver.set_window_size(1854, 1048)
+
+        # Navegar a la sección "Explore"
+        element = WebDriverWait(self.driver, 10).until(
+            EC.element_to_be_clickable((By.CSS_SELECTOR, ".sidebar-item:nth-child(3) .align-middle:nth-child(2)"))
+        )
+        element.click()
+
+        # Aplicar filtros combinados
+        self.driver.find_element(By.ID, "number_of_features").send_keys("33")
+        self.driver.find_element(By.ID, "number_of_models").send_keys("3")
+        self.driver.find_element(By.ID, "clear-filters").click()
+
+    def test_no_results_for_invalid_filters(self):
+        """
+        Probar combinación inválida de filtros que no devuelve resultados.
+        """
+        self.driver.get("http://127.0.0.1:5000/")
+        self.driver.set_window_size(1854, 1048)
+
+        # Navegar a la sección "Explore"
+        element = WebDriverWait(self.driver, 10).until(
+            EC.element_to_be_clickable((By.CSS_SELECTOR, ".sidebar-item:nth-child(3) .align-middle:nth-child(2)"))
+        )
+        element.click()
+
+        # Aplicar filtros inválidos
+        self.driver.find_element(By.ID, "number_of_features").send_keys("999")
+        self.driver.find_element(By.ID, "number_of_models").send_keys("999")
+        self.driver.find_element(By.ID, "clear-filters").click()

@@ -58,11 +58,11 @@ class ExploreRepository(BaseRepository):
 
         # Filtros de métricas (características y productos)
         if number_of_features:
-            datasets = datasets.filter(DSMetrics.number_of_features == number_of_features)
-                
+            datasets = datasets.filter(DSMetrics.number_of_features == str(number_of_features))
+
         if number_of_models:
-            datasets = datasets.filter(DSMetrics.number_of_models == number_of_models)
-        
+            datasets = datasets.filter(DSMetrics.number_of_models == str(number_of_models))
+
         # Filtro de fechas
         if after_date and before_date:
             datasets = datasets.filter(DataSet.created_at.between(after_date, before_date))
