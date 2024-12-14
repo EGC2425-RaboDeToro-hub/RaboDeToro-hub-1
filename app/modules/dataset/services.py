@@ -48,23 +48,6 @@ def calculate_checksum_and_size(file_path):
         return hash_md5, file_size
 
 
-def count_features_and_products(uvl_content):
-    import re
-
-    # Contar características
-    feature_count = len(re.findall(r"^\s*[^#\s]", uvl_content, re.MULTILINE))
-
-    # Calcular número de productos posibles (simplificado)
-    alternatives = re.findall(r"alternative\s+{([^}]+)}", uvl_content)
-    ors = re.findall(r"or\s+{([^}]+)}", uvl_content)
-    product_count = 1
-    for option_group in alternatives + ors:
-        options = option_group.splitlines()
-        product_count *= len(options)
-
-    return feature_count, product_count
-
-
 class DataSetService(BaseService):
     def __init__(self):
         super().__init__(DataSetRepository())
@@ -129,16 +112,6 @@ class DataSetService(BaseService):
     def total_dataset_views(self) -> int:
         return self.dsviewrecord_repostory.total_dataset_views()
 
-    def filter_datasets(
-        self, min_features=None, max_features=None, min_products=None, max_products=None
-    ):
-        return self.repository.filter_datasets(
-            min_features=min_features,
-            max_features=max_features,
-            min_products=min_products,
-            max_products=max_products,
-        )
-
     def create_from_form(self, form, current_user) -> DataSet:
         # Definir el autor principal
         main_author = {
@@ -152,11 +125,6 @@ class DataSetService(BaseService):
             # Crear DSMetaData
             dsmetadata = self.dsmetadata_repository.create(**form.get_dsmetadata())
 
-            # Crear o actualizar DSMetrics
-            if not dsmetadata.ds_metrics:
-                dsmetadata.ds_metrics = DSMetrics(feature_count=0, product_count=0)
-            metrics = dsmetadata.ds_metrics
-
             # Agregar autores principales y adicionales
             for author_data in [main_author] + form.get_authors():
                 author = self.author_repository.create(
@@ -168,10 +136,6 @@ class DataSetService(BaseService):
             dataset = self.create(
                 commit=False, user_id=current_user.id, ds_meta_data_id=dsmetadata.id
             )
-
-            # Inicializar métricas agregadas
-            total_feature_count = 0
-            total_product_count = 0
 
             # Procesar cada modelo UVL del formulario
             for feature_model in form.feature_models:
@@ -198,17 +162,6 @@ class DataSetService(BaseService):
                 file_path = os.path.join(current_user.temp_folder(), uvl_filename)
                 checksum, size = calculate_checksum_and_size(file_path)
 
-                # Contar características y productos en el archivo UVL
-                with open(file_path, "r") as uvl_file:
-                    uvl_content = uvl_file.read()
-                    feature_count, product_count = count_features_and_products(
-                        uvl_content
-                    )
-
-                # Actualizar métricas agregadas
-                total_feature_count += feature_count
-                total_product_count += product_count
-
                 # Crear el archivo relacionado con el modelo
                 file = self.hubfilerepository.create(
                     commit=False,
@@ -219,14 +172,10 @@ class DataSetService(BaseService):
                 )
                 fm.files.append(file)
 
-            # Actualizar DSMetrics con las métricas agregadas
-            metrics.feature_count += total_feature_count
-            metrics.product_count += total_product_count
-
             # Guardar los cambios en la base de datos
             self.repository.session.commit()
         except Exception as exc:
-            logger.error(f"Exception creating dataset from form: {exc}")
+            logger.info(f"Exception creating dataset from form...: {exc}")
             self.repository.session.rollback()
             raise exc
 

@@ -50,16 +50,9 @@ class DSMetrics(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     number_of_models = db.Column(db.String(120))
     number_of_features = db.Column(db.String(120))
-    feature_count = db.Column(db.Integer, nullable=False, default=0)  # Columna física
-    product_count = db.Column(db.Integer, nullable=False, default=0)  # Columna física
-
-
-@listens_for(DSMetrics, 'before_insert')
-@listens_for(DSMetrics, 'before_update')
-def update_feature_and_product_count(mapper, connection, target):
-    """Actualiza feature_count y product_count antes de insertar o actualizar."""
-    target.feature_count = len(target.number_of_features.split(",")) if target.number_of_features else 0
-    target.product_count = len(target.number_of_models.split(",")) if target.number_of_models else 0
+    
+    def __repr__(self):
+        return f'DSMetrics<models={self.number_of_models}, features={self.number_of_features}>'
 
 
 class DSMetaData(db.Model):

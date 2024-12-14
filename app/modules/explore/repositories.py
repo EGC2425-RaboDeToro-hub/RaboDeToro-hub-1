@@ -13,7 +13,7 @@ class ExploreRepository(BaseRepository):
     def filter(
         self, query="", sorting="newest", publication_type="any", tags=[],
         after_date=None, before_date=None, min_size=None, max_size=None,
-        min_features=None, max_features=None, min_products=None, max_products=None, **kwargs
+        number_of_features="", number_of_models="", **kwargs
     ):
         normalized_query = unidecode.unidecode(query).lower()
         cleaned_query = re.sub(r'[,.":\'()\[\]^;!¡¿?]', "", normalized_query)
@@ -57,15 +57,12 @@ class ExploreRepository(BaseRepository):
             datasets = datasets.filter(or_(*[DSMetaData.tags.ilike(f"%{tag}%") for tag in tags]))
 
         # Filtros de métricas (características y productos)
-        if min_features is not None:
-            datasets = datasets.filter(DSMetrics.feature_count >= min_features)
-        if max_features is not None:
-            datasets = datasets.filter(DSMetrics.feature_count <= max_features)
-        if min_products is not None:
-            datasets = datasets.filter(DSMetrics.product_count >= min_products)
-        if max_products is not None:
-            datasets = datasets.filter(DSMetrics.product_count <= max_products)
-
+        if number_of_features:
+            datasets = datasets.filter(DSMetrics.number_of_features == number_of_features)
+                
+        if number_of_models:
+            datasets = datasets.filter(DSMetrics.number_of_models == number_of_models)
+        
         # Filtro de fechas
         if after_date and before_date:
             datasets = datasets.filter(DataSet.created_at.between(after_date, before_date))
