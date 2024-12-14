@@ -15,7 +15,7 @@ def index():
         sorting = request.args.get('sorting', 'newest')
         publication_type = request.args.get('publication_type', 'any')
         tags = request.args.getlist('tags')
-        number_of_features=request.args.get('number_of_features'),
+        number_of_features=request.args.get('number_of_features')
         number_of_models=request.args.get('number_of_models')
 
         # Convertir las fechas a datetime si están presentes y ajustar la hora
@@ -34,16 +34,21 @@ def index():
             except ValueError:
                 before_date = None
 
-        datasets = ExploreService().filter(
-            query=query,
-            sorting=sorting,
-            publication_type=publication_type,
-            tags=tags,
-            after_date=after_date,
-            before_date=before_date,
-            number_of_features=number_of_features,
-            number_of_models=number_of_models
-        )
+        try:
+            datasets = ExploreService().filter(
+                query=query,
+                sorting=sorting,
+                publication_type=publication_type,
+                tags=tags,
+                after_date=after_date,
+                before_date=before_date,
+                number_of_features=number_of_features,
+                number_of_models=number_of_models
+            )
+        except Exception as e:
+            print(f"Error while filtering datasets: {e}")
+            datasets = []
+
 
         form = ExploreForm()
         return render_template('explore/index.html', form=form, query=query, datasets=datasets)
