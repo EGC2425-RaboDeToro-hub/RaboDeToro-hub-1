@@ -4,143 +4,117 @@
 
 {% block content %}
 
-<div class="container-fluid">
-    <div class="row">
-        <!-- Sección de filtros -->
-        <div class="col-md-3">
-            <h4>Filters</h4>
-            <form method="get" action="{{ url_for('dataset.list') }}" class="mb-4">
-                <div class="form-group">
-                    <label for="min_features">Min Features:</label>
-                    <input type="number" name="min_features" id="min_features" class="form-control" placeholder="Min Features">
+    <h1 class="h3 mb-3">My datasets</h1>
+
+    {% if datasets %}
+        <div class=" col-12">
+            <div class="card">
+
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Publication type</th>
+                            <th>Dataset DOI</th>
+                            <th>Options</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for dataset in datasets %}
+                            <tr>
+                                <td>
+                                    <a href="{{ dataset.get_uvlhub_doi() }}">
+                                        {{ dataset.ds_meta_data.title }}
+                                    </a>
+                                    {% if dataset.is_anonymous() %} 
+                                        <span class="badge bg-warning">Anonymous</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ dataset.get_publication() }}</td>
+                                <td><a href="{{ dataset.get_uvlhub_doi() }}"
+                                       target="_blank">{{ dataset.get_uvlhub_doi() }}</a></td>
+                                <td>
+                                    <a href="{{ url_for('dataset.edit_dataset', dataset_id=dataset.id) }}">
+                                        <i data-feather="edit"></i>
+                                    </a>
+                                    <a href="{{ dataset.get_uvlhub_doi() }}">
+                                        <i data-feather="eye"></i>
+                                    </a>
+                                    <a href="{{ url_for('dataset.download_dataset', dataset_id=dataset.id) }}">
+                                        <i data-feather="download"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
-                <div class="form-group">
-                    <label for="max_features">Max Features:</label>
-                    <input type="number" name="max_features" id="max_features" class="form-control" placeholder="Max Features">
-                </div>
-                <div class="form-group">
-                    <label for="min_products">Min Products:</label>
-                    <input type="number" name="min_products" id="min_products" class="form-control" placeholder="Min Products">
-                </div>
-                <div class="form-group">
-                    <label for="max_products">Max Products:</label>
-                    <input type="number" name="max_products" id="max_products" class="form-control" placeholder="Max Products">
-                </div>
-                <button type="submit" class="btn btn-primary btn-block">Apply Filters</button>
-            </form>
+
+            </div>
+
         </div>
+    {% else %}
+        <div class="col-12 col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">No datasets found</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        You have not created any dataset synchronized with Zenodo, are you up for it?
+                    </p>
+                    <a href="{{ url_for('dataset.create_dataset') }}" class="btn btn-primary">
+                        Upload dataset</a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
 
-        <!-- Sección de resultados de datasets -->
-        <div class="col-md-9">
-            <h1 class="h3 mb-3">My datasets</h1>
+    <div class="row">
 
-            {% if datasets %}
-                <div class="col-12">
-                    <div class="card">
+
+        <div class="col-12">
+            {% if local_datasets %}
+                <div class="card">
+                    <div class="card-body">
+                        <div class="card-header">
+                            <h5 class="card-title">Unsynchronized datasets</h5>
+                        </div>
                         <div class="card-body">
                             <table class="table">
                                 <thead>
-                                    <tr>
-                                        <th>Title</th>
-                                        <th>Description</th>
-                                        <th>Publication type</th>
-                                        <th>Dataset DOI</th>
-                                        <th>Options</th>
-                                    </tr>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Publication type</th>
+                                    <th>Options</th>
+                                </tr>
                                 </thead>
                                 <tbody>
-                                    {% for dataset in datasets %}
-                                        <tr>
-                                            <td>
-                                                <a href="{{ dataset.get_uvlhub_doi() }}">
-                                                    {{ dataset.ds_meta_data.title }}
-                                                </a>
-                                            </td>
-                                            <td>{{ dataset.ds_meta_data.description }}</td>
-                                            <td>{{ dataset.ds_meta_data.publication_type.name.replace('_', ' ').title() }}</td>
-                                            <td>
-                                                <a href="{{ dataset.get_uvlhub_doi() }}" target="_blank">{{ dataset.get_uvlhub_doi() }}</a>
-                                            </td>
-                                            <td>
-                                                <a href="{{ dataset.get_uvlhub_doi() }}">
-                                                    <i data-feather="eye"></i>
-                                                </a>
-                                                <a href="{{ url_for('dataset.download_dataset', dataset_id=dataset.id) }}">
-                                                    <i data-feather="download"></i>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
+                                {% for local_dataset in local_datasets %}
+                                    <tr>
+                                        <td>
+                                            <a href="{{ url_for('dataset.get_unsynchronized_dataset', dataset_id=local_dataset.id) }}">
+                                                {{ local_dataset.ds_meta_data.title }}
+                                            </a>
+                                        </td>
+                                        <td>{{ local_dataset.get_publication() }}</td>
+                                        <td>
+                                            <a href="{{ url_for('dataset.get_unsynchronized_dataset', dataset_id=local_dataset.id) }}">
+                                                <i data-feather="eye"></i>
+                                            </a>
+                                            <a href="{{ url_for('dataset.download_dataset', dataset_id=local_dataset.id) }}">
+                                                <i data-feather="download"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
-            {% else %}
-                <div class="col-12 col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">No datasets found</h5>
-                        </div>
-                        <div class="card-body">
-                            <p class="card-text">
-                                You have not created any dataset synchronized with Zenodo, are you up for it?
-                            </p>
-                            <a href="{{ url_for('dataset.create_dataset') }}" class="btn btn-primary">Upload dataset</a>
-                        </div>
-                    </div>
-                </div>
             {% endif %}
-
-            <!-- Sección de datasets no sincronizados -->
-            <div class="row">
-                <div class="col-12">
-                    {% if local_datasets %}
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="card-header">
-                                    <h5 class="card-title">Unsynchronized datasets</h5>
-                                </div>
-                                <div class="card-body">
-                                    <table class="table">
-                                        <thead>
-                                            <tr>
-                                                <th>Title</th>
-                                                <th>Description</th>
-                                                <th>Publication type</th>
-                                                <th>Options</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for local_dataset in local_datasets %}
-                                                <tr>
-                                                    <td>
-                                                        <a href="{{ url_for('dataset.get_unsynchronized_dataset', dataset_id=local_dataset.id) }}">
-                                                            {{ local_dataset.ds_meta_data.title }}
-                                                        </a>
-                                                    </td>
-                                                    <td>{{ local_dataset.ds_meta_data.description }}</td>
-                                                    <td>{{ local_dataset.ds_meta_data.publication_type.name.replace('_', ' ').title() }}</td>
-                                                    <td>
-                                                        <a href="{{ url_for('dataset.get_unsynchronized_dataset', dataset_id=local_dataset.id) }}">
-                                                            <i data-feather="eye"></i>
-                                                        </a>
-                                                        <a href="{{ url_for('dataset.download_dataset', dataset_id=local_dataset.id) }}">
-                                                            <i data-feather="download"></i>
-                                                        </a>
-                                                    </td>
-                                                </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
         </div>
-    </div>
-</div>
 
 {% endblock %}

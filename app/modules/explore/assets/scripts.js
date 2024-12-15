@@ -47,10 +47,8 @@ function send_query() {
         query: document.querySelector('#query').value,
         publication_type: document.querySelector('#publication_type').value,
         sorting: document.querySelector('[name="sorting"]:checked')?.value,
-        min_features: document.querySelector('#min_features').value || null,
-        max_features: document.querySelector('#max_features').value || null,
-        min_products: document.querySelector('#min_products').value || null,
-        max_products: document.querySelector('#max_products').value || null,
+        number_of_features: document.querySelector('#number_of_features').value,
+        number_of_models: document.querySelector('#number_of_models').value,           
         after_date: document.querySelector('#after_date').value || null, // Filtros de fechas
         before_date: document.querySelector('#before_date').value || null,
         min_size: parseFloat(document.querySelector('#min_size').value) || null, // Filtros de tamaño
@@ -127,10 +125,8 @@ function clearFilters() {
     });
 
     // Resetear filtros de características, productos, fechas y tamaños
-    document.querySelector('#min_features').value = "";
-    document.querySelector('#max_features').value = "";
-    document.querySelector('#min_products').value = "";
-    document.querySelector('#max_products').value = "";
+    document.querySelector('#number_of_features').value = "";
+    document.querySelector('#number_of_models').value = "";
     document.querySelector('#after_date').value = "";
     document.querySelector('#before_date').value = "";
     document.querySelector('#min_size').value = "";

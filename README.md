@@ -54,6 +54,49 @@ Algunas de las nuevas integraciones son los "Work Items":
 
 - **Fakenodo:** Redirigimos las llamadas a zenodo a fakenodo para evitar sobresaturar la red.
 
+
+## 💻 Tecnologias usadas:
+- **Lenguaje**:Python(Flask)
+- **Frontend**: HTML, CSS, JavaScript
+- **Base de datos**: MySQL/MariaDB
+- **Automatización y CI/CD**: Github Actions, Render
+- **Pruebas Automatizadas**: Selenium, Pytest
+- **Virtualización**: Docker,Vagrant
+
+## 🚀Instalación:
+Sigue estos pasos para configurar el proyecto después de clonar el repositorio:
+
+**1. Clona el repositorio**
+```
+git clone https://github.com/EGC2425-RaboDeToro-hub/RaboDeToro-hub-1.git
+cd RaboDeToro-hub-1
+```
+**2. Ejecuta el script de instalación**
+
+Usa el script proporcionado para configurar el entorno, la base de datos y las dependencias:
+
+```
+chmod +x setup.sh
+./setup.sh
+```
+
+## 🧪 Pruebas:
+
+Para ejecutar las pruebas en el proyecto ejecuta el siguiente comando:
+
+**Usando rosemary**
+
+```
+rosemary test //para pruebas unitarias y de integración
+rosemary selenium //para pruebas de interfaz
+```
+
+**Usando pytest**
+
+```
+pytest app/modules
+```
+
 ### Cambios realizados
 - **Script de construccion:** A partir de ahora podra preparar todo el entorno del proyecto con un simple comando: ./setup.sh. Este script se encargara de realizar todo lo que usted podria deberia de haber hecho siguiendo el manual de instalacion
 
@@ -67,6 +110,9 @@ Algunas de las nuevas integraciones son los "Work Items":
 ## 📖 Wiki del proyecto
 
  - **Wiki:** [https://github.com/EGC2425-RaboDeToro-hub/RaboDeToro-hub-1/wiki](https://github.com/EGC2425-RaboDeToro-hub/RaboDeToro-hub-1/wiki)
+
+
+
 
 
 
@@ -108,12 +154,54 @@ Some of the new integrations are the "Work Items":
 
 - **Fakenodo:** Redirecting Zenodo calls to Fakenodo to avoid network overload.
 
+## 💻 Technologies Used:
+- **Language**:Python(Flask)
+- **Frontend**: HTML, CSS, JavaScript
+- **Database**: MySQL/MariaDB
+- **Automation and CI/CD**: Github Actions, Render
+- **Automated Testing**: Selenium, Pytest
+- **Virtualization**: Docker,Vagrant
+
+## Installation:
+Follow these steps to set up the project after cloning the repository:
+
+**1. Clone the repository**
+```
+git clone https://github.com/EGC2425-RaboDeToro-hub/RaboDeToro-hub-1.git
+cd RaboDeToro-hub-1
+```
+**2. Run the setup script**
+
+Use the provided script to configure the environment, database, and dependencies:
+
+```
+chmod +x setup.sh
+./setup.sh
+```
+## 🧪 Tests:
+
+To run the tests in the project, execute the following command:
+
+**Using rosemary**
+
+```
+rosemary test //para pruebas unitarias y de integración
+rosemary selenium //para pruebas de interfaz
+```
+
+**Using pytest**
+
+```
+pytest app/modules
+```
+
 ### Changes Made
 - **Build Script:** From now on, you can prepare the entire project environment with a single command: ./setup.sh. This script will handle everything you would have done by following the installation manual.
 
 - **Log and Flask Session Management:** To avoid the inclusion of unwanted logs in the code, the code has been modified to delete them every time the project starts, and they have been excluded from the repository. The same has been done with Flask sessions.
 
 - **Lint Fixes:** All lint errors that appeared when using flake8 have been fixed.
+
 
 ## 🌐 Project Deployment Link:
 - **Render:**  [ https://rabodetoro-hub-1.onrender.com](https://rabodetoro-hub-1.onrender.com)
