@@ -22,7 +22,6 @@ class EmailService(BaseService):
         app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")
         app.config["MAIL_DEFAULT_SENDER"] = os.getenv("MAIL_DEFAULT_SENDER")
 
-
         self.mail = Mail(app)
         self.sender = app.config["MAIL_USERNAME"]
 
