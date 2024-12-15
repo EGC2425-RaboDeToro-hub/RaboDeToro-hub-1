@@ -21,18 +21,26 @@ class DataSetSeeder(BaseSeeder):
     priority = 2  # Lower priority
 
     def count_features_in_uvl(self, file_path):
-        """Cuenta características dentro de la sección 'features' de un archivo UVL."""
+        """Cuenta características reales dentro de la sección 'features' de un archivo UVL."""
         with open(file_path, 'r') as file:
             content = file.read()
 
             # Extraer la sección 'features'
             features_section = re.search(r'features\s+(.+?)constraints', content, re.DOTALL)
             if not features_section:
-                return 0  # Si no hay sección de características, devolver 0
+                return 0  # Si no hay sección 'features', devolver 0
 
-            # Contar líneas válidas dentro de 'features'
+            # Obtener contenido de 'features'
             features_content = features_section.group(1)
-            return len(re.findall(r'^[ \t]*[^\s#]+[ \t]*$', features_content, re.MULTILINE))
+
+            # Capturar características reales, incluyendo las que tienen comillas
+            features = re.findall(r'^[ \t]*"?([a-zA-Z0-9_ \-]+)"?[ \t]*$', features_content, re.MULTILINE)
+            filtered_features = [
+                f.strip() for f in features
+                if not re.match(r'^\s*(mandatory|optional|alternative|or)\s*$', f.strip())
+            ]
+            return len(filtered_features)
+
 
     def run(self):
         # Limpieza de tablas relacionadas para evitar duplicados
