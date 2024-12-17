@@ -21,9 +21,9 @@ jobs:
         image: mysql:5.7
         env:
           MYSQL_ROOT_PASSWORD: uvlhub_root_password
-          MYSQL_DATABASE: rdtdb
-          MYSQL_USER: rdtdb_user
-          MYSQL_PASSWORD: rdtdb_password
+          MYSQL_DATABASE: uvlhubdb
+          MYSQL_USER: uvlhubdb_user
+          MYSQL_PASSWORD: uvlhubdb_password
         ports:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
@@ -50,9 +50,9 @@ jobs:
         FLASK_ENV: testing
         MARIADB_HOSTNAME: 127.0.0.1
         MARIADB_PORT: 3306
-        MARIADB_TEST_DATABASE: rdtdb_test
-        MARIADB_USER: rdtdb_user
-        MARIADB_PASSWORD: rdtdb_password
+        MARIADB_TEST_DATABASE: uvlhubdb_test
+        MARIADB_USER: uvlhubdb_user
+        MARIADB_PASSWORD: uvlhubdb_password
       run: |
         pytest app/modules/ --ignore-glob='*selenium*'
 
