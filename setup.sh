@@ -46,7 +46,7 @@ expect eof
 echo "$SECURE_MYSQL"
 
 # Configurar la base de datos
-sudo mysql -u root -p"uvlhubdb_root_password" <<EOF
+sudo mysql -u root -p "uvlhubdb_root_password" <<EOF
 DROP DATABASE IF EXISTS uvlhubdb;
 DROP DATABASE IF EXISTS uvlhubdb_test;
 DROP USER IF EXISTS 'uvlhubdb_user'@'localhost';
