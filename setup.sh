@@ -46,15 +46,15 @@ expect eof
 echo "$SECURE_MYSQL"
 
 # Configurar la base de datos
-sudo mysql -u root -p"uvlhubdb_root_password" <<EOF
-DROP DATABASE IF EXISTS rdtdb;
-DROP DATABASE IF EXISTS rdtdb_test;
-DROP USER IF EXISTS 'rdtdb_user'@'localhost';
-CREATE DATABASE rdtdb;
-CREATE DATABASE rdtdb_test;
-CREATE USER 'rdtdb_user'@'localhost' IDENTIFIED BY 'rdtdb_password';
-GRANT ALL PRIVILEGES ON rdtdb.* TO 'rdtdb_user'@'localhost';
-GRANT ALL PRIVILEGES ON rdtdb_test.* TO 'rdtdb_user'@'localhost';
+sudo mysql -u root -p "uvlhubdb_root_password" <<EOF
+DROP DATABASE IF EXISTS uvlhubdb;
+DROP DATABASE IF EXISTS uvlhubdb_test;
+DROP USER IF EXISTS 'uvlhubdb_user'@'localhost';
+CREATE DATABASE uvlhubdb;
+CREATE DATABASE uvlhubdb_test;
+CREATE USER 'uvlhubdb_user'@'localhost' IDENTIFIED BY 'uvlhubdb_password';
+GRANT ALL PRIVILEGES ON uvlhubdb.* TO 'uvlhubdb_user'@'localhost';
+GRANT ALL PRIVILEGES ON uvlhubdb_test.* TO 'uvlhubdb_user'@'localhost';
 FLUSH PRIVILEGES;
 EOF
 
