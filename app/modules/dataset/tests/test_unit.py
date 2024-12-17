@@ -61,3 +61,76 @@ def test_zip_all_datasets_error(dataset_service):
         # Llama al método del servicio y verifica que se maneje la excepción
         with pytest.raises(Exception):
             dataset_service.zip_all_datasets()
+
+
+# Test 3: Verificar conversión a formato glencoe
+def test_convert_to_format_glencoe(dataset_service, tmpdir):
+    input_file = tmpdir.join("input.uvl")
+    input_file.write("feature_model_content")  # Contenido de prueba
+
+    with patch(
+        "flamapy.metamodels.fm_metamodel.transformations.UVLReader.transform"
+    ) as mock_transform:
+        with patch(
+            "flamapy.metamodels.fm_metamodel.transformations.GlencoeWriter.transform"
+        ) as mock_writer:
+            mock_transform.return_value = "mocked_fm"
+            mock_writer.return_value = None  # La función no devuelve nada
+
+
+# Test 4: Verificar conversión a formato dimacs
+def test_convert_to_format_dimacs(dataset_service, tmpdir):
+    input_file = tmpdir.join("input.uvl")
+    input_file.write("feature_model_content")
+
+    with patch(
+        "flamapy.metamodels.fm_metamodel.transformations.UVLReader.transform"
+    ) as mock_transform:
+        with patch(
+            "flamapy.metamodels.pysat_metamodel.transformations.FmToPysat.transform"
+        ) as mock_pysat:
+            with patch(
+                "flamapy.metamodels.pysat_metamodel.transformations.DimacsWriter.transform"
+            ) as mock_writer:
+                mock_transform.return_value = "mocked_fm"
+                mock_pysat.return_value = "mocked_sat"
+                mock_writer.return_value = None
+
+                result = dataset_service.convert_to_format(str(input_file), "dimacs")
+                assert result is not None
+
+
+# Test 5: Verificar conversión a formato splot
+def test_convert_to_format_splot(dataset_service, tmpdir):
+    input_file = tmpdir.join("input.uvl")
+    input_file.write("feature_model_content")
+
+    with patch(
+        "flamapy.metamodels.fm_metamodel.transformations.UVLReader.transform"
+    ) as mock_transform:
+        with patch(
+            "flamapy.metamodels.fm_metamodel.transformations.SPLOTWriter.transform"
+        ) as mock_writer:
+            mock_transform.return_value = "mocked_fm"
+            mock_writer.return_value = None
+
+            result = dataset_service.convert_to_format(str(input_file), "splot")
+            assert result is not None
+
+
+# Test 6: Verificar que con un formato desconocido devuelve none
+def test_convert_to_format_unknown_format(dataset_service, tmpdir):
+    input_file = tmpdir.join("input.uvl")
+    input_file.write("feature_model_content")
+
+    result = dataset_service.convert_to_format(str(input_file), "desconocido")
+    assert result is None
+
+
+# Test 7: Verifica que cuando el formato es uvl, devuelve el contenido del archivo original
+def test_convert_to_format_uvl(dataset_service, tmpdir):
+    input_file = tmpdir.join("input.uvl")
+    input_file.write("original")
+
+    result = dataset_service.convert_to_format(str(input_file), "uvl")
+    assert result == "original"
