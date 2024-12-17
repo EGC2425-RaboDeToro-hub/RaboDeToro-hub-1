@@ -45,7 +45,7 @@
 
                                     <!-- Opciones: Ver y Descargar -->
                                     <td>
-                                        <a href="{{ url_for('profile.dataset_detail', dataset_id=dataset.id) }}">
+                                        <a href="{{ dataset.get_uvlhub_doi() }}">
                                             <i data-feather="eye"></i>
                                         </a>
                                         <a href="{{ url_for('dataset.download_dataset', dataset_id=dataset.id) }}">
