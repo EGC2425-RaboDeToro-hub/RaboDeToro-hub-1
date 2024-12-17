@@ -15,6 +15,10 @@
 # Exit immediately if a command exits with a non-zero status
 set -e
 
+mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "GRANT ALL PRIVILEGES ON uvlhub_test.* TO 'uvlhub_user'@'%';"
+mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "FLUSH PRIVILEGES;"
+
+
 # Initialize migrations only if the migrations directory doesn't exist
 if [ ! -d "migrations/versions" ]; then
     # Initialize the migration repository
