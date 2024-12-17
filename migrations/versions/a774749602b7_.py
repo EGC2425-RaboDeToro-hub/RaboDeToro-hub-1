@@ -1,8 +1,8 @@
-"""Migración inicial
+"""empty message
 
-Revision ID: 598ffa33502d
+Revision ID: a774749602b7
 Revises: 
-Create Date: 2024-11-20 11:34:46.076220
+Create Date: 2024-12-17 13:38:53.543650
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '598ffa33502d'
+revision = 'a774749602b7'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -36,9 +36,14 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('number_of_models', sa.String(length=120), nullable=True),
     sa.Column('number_of_features', sa.String(length=120), nullable=True),
-    sa.Column('feature_count', sa.Integer(), nullable=False),
-    sa.Column('product_count', sa.Integer(), nullable=False),
     sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('fakenodo',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('doi', sa.String(length=255), nullable=False),
+    sa.Column('dep_metadata', sa.JSON(), nullable=True),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('doi')
     )
     op.create_table('fm_metrics',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -218,6 +223,7 @@ def downgrade():
     op.drop_table('user')
     op.drop_table('token')
     op.drop_table('fm_metrics')
+    op.drop_table('fakenodo')
     op.drop_table('ds_metrics')
     op.drop_table('doi_mapping')
     op.drop_table('community')
