@@ -2,20 +2,6 @@
 
 set -e
 
-# Pedir al usuario el nombre de la base de datos y la contraseña
-read -p "Ingrese el nombre de la base de datos: " dbname
-read -p "Ingrese el nombre del usuario que desea usar en la base de datos: " dbuser
-read -sp "Ingrese la contraseña para el usuario root de la base de datos: " dbrootpassword
-echo
-read -sp "Confirme la contraseña para el usuario root de la base de datos: " dbrootpassword_confirm
-echo
-
-# Verificar que las contraseñas coincidan
-if [ "$dbrootpassword" != "$dbrootpassword_confirm" ]; then
-    echo "Las contraseñas no coinciden. Inténtelo de nuevo."
-    exit 1
-fi
-
 sudo apt install expect -y
 
 # Instalar mariadb e iniciar el servicio
@@ -37,10 +23,10 @@ expect \"Change the root password? [Y/n]\"
 send \"y\r\"
 
 expect \"New password:\"
-send \"$dbrootpassword\r\"
+send \"uvlhubdb_root_password\r\"
 
 expect \"Re-enter new password:\"
-send \"$dbrootpassword\r\"
+send \"uvlhubdb_root_password\r\"
 
 expect \"Remove anonymous users? [Y/n]\"
 send \"y\r\"
@@ -60,15 +46,15 @@ expect eof
 echo "$SECURE_MYSQL"
 
 # Configurar la base de datos
-sudo mysql -u root -p"$dbrootpassword" <<EOF
-DROP DATABASE IF EXISTS $dbname;
-DROP DATABASE IF EXISTS ${dbname}_test;
-DROP USER IF EXISTS '$dbuser'@'localhost';
-CREATE DATABASE $dbname;
-CREATE DATABASE ${dbname}_test;
-CREATE USER '$dbuser'@'localhost' IDENTIFIED BY 'uvlhubdb_password';
-GRANT ALL PRIVILEGES ON $dbname.* TO '$dbuser'@'localhost';
-GRANT ALL PRIVILEGES ON ${dbname}_test.* TO '$dbuser'@'localhost';
+sudo mysql -u root -p"uvlhubdb_root_password" <<EOF
+DROP DATABASE IF EXISTS rdtdb;
+DROP DATABASE IF EXISTS rdtdb_test;
+DROP USER IF EXISTS 'rdtdb_user'@'localhost';
+CREATE DATABASE rdtdb;
+CREATE DATABASE rdtdb_test;
+CREATE USER 'rdtdb_user'@'localhost' IDENTIFIED BY 'rdtdb_password';
+GRANT ALL PRIVILEGES ON rdtdb.* TO 'rdtdb_user'@'localhost';
+GRANT ALL PRIVILEGES ON rdtdb_test.* TO 'rdtdb_user'@'localhost';
 FLUSH PRIVILEGES;
 EOF
 
@@ -88,7 +74,6 @@ pip install -r requirements.txt
 pip install -e ./
 
 # Iniciar la aplicacion
-rosemary db:seed
 flask db upgrade
+rosemary db:seed
 flask run --host=0.0.0.0 --port=5000
-
