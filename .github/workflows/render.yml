@@ -50,7 +50,7 @@ jobs:
         FLASK_ENV: testing
         MARIADB_HOSTNAME: 'localhost'
         MARIADB_PORT: 3306
-        MARIADB_TEST_DATABASE: uvlhubdb_test
+        MARIADB_TEST_DATABASE: uvlhubdb
         MARIADB_USER: uvlhubdb_user
         MARIADB_PASSWORD: uvlhubdb_password
       run: |
